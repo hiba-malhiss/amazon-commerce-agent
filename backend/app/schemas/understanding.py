@@ -1,14 +1,20 @@
-from typing import Any
+from pydantic import BaseModel, ConfigDict
 
-from pydantic import BaseModel, Field
+
+class ExtractedParameter(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    code: str
+    value: str | float | bool
 
 
 class Request(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     question: str
     tool: str
-    entities: list[str] = Field(default_factory=list)
+    entities: list[str]
 
 
 class UnderstandingResult(BaseModel):
-    parameters: dict[str, Any] = Field(default_factory=dict)
-    requests: list[Request] = Field(default_factory=list)
+    model_config = ConfigDict(extra="forbid")
+    parameters: list[ExtractedParameter]
+    requests: list[Request]
