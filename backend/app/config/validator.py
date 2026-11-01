@@ -4,6 +4,7 @@ from app.config.parameters import PARAMETERS
 from app.config.tools.registry import TOOLS
 from app.schemas.config import APIIntegrationConfig
 
+
 # validate the relations
 def validate_config() -> None:
     # Build configuration lookup dictionaries
