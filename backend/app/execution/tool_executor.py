@@ -1,11 +1,11 @@
 from typing import Any
 
-from app.agent.entity_mapper import map_entities
-from app.agent.parameter_validator import get_missing_parameters
-from app.config.integrations.registry import INTEGRATIONS_BY_CODE
-from app.config.tools.registry import TOOLS_BY_CODE
-from app.integrations.api_executor import execute_api
-from app.schemas.config import APIIntegrationConfig
+from app.configurations.integrations.registry import INTEGRATIONS_BY_CODE
+from app.configurations.schemas import APIIntegrationConfig
+from app.configurations.tools.registry import TOOLS_BY_CODE
+from app.execution.entity_mapper import map_entities
+from app.execution.integrations.api_executor import execute_api
+from app.execution.parameter_validator import get_missing_parameters
 
 
 async def execute_tool(

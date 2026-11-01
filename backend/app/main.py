@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.agent.graph import build_graph
-from app.api.routes.threads import router as threads_router
+from app.conversations.routes import router as threads_router
 from app.database.checkpointer import postgres_checkpointer
 
 

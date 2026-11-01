@@ -1,4 +1,4 @@
-from app.schemas.config import ParameterConfig
+from app.configurations.schemas import ParameterConfig
 
 PARAMETERS = [
     ParameterConfig(

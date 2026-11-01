@@ -1,6 +1,6 @@
 from typing import Any
 
-from app.schemas.config import APIIntegrationConfig
+from app.configurations.schemas import APIIntegrationConfig
 
 
 def build_api_request(

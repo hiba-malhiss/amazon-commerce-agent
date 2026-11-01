@@ -1,4 +1,4 @@
-from app.schemas.config import (
+from app.configurations.schemas import (
     APIIntegrationConfig,
     AuthenticationConfig,
     EntityMappingConfig,
@@ -16,6 +16,8 @@ AMAZON_PRODUCT_SEARCH = APIIntegrationConfig(
     query_params={
         "q": "query",
         "currency": "currency",
+        "price_min": "min_price",
+        "price_max": "max_price",
     },
     entity_mapping=EntityMappingConfig(
         entity_code="product",

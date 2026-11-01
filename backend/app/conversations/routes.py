@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter
 
-from app.api.schemas.thread import ThreadResponse
+from app.conversations.schemas import ThreadResponse
 
 router = APIRouter(prefix="/threads", tags=["Threads"])
 

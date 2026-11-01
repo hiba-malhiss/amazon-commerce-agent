@@ -1,8 +1,8 @@
 from typing import Any
 from uuid import uuid4
 
-from app.config.entities.registry import ENTITIES_BY_CODE
-from app.schemas.config import EntityMappingConfig
+from app.configurations.entities.registry import ENTITIES_BY_CODE
+from app.configurations.schemas import EntityMappingConfig
 
 
 def get_path(data: dict, path: str) -> Any:

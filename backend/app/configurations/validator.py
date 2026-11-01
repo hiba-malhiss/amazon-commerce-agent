@@ -1,8 +1,8 @@
-from app.config.entities.registry import ENTITIES
-from app.config.integrations.registry import INTEGRATIONS
-from app.config.parameters import PARAMETERS
-from app.config.tools.registry import TOOLS
-from app.schemas.config import APIIntegrationConfig
+from app.configurations.entities.registry import ENTITIES
+from app.configurations.integrations.registry import INTEGRATIONS
+from app.configurations.parameters import PARAMETERS
+from app.configurations.schemas import APIIntegrationConfig
+from app.configurations.tools.registry import TOOLS
 
 
 # validate the relations
@@ -52,6 +52,16 @@ def validate_config() -> None:
                     f"Tool '{tool.code}' has required parameters "
                     f"not mapped by integration '{integration.code}': "
                     f"{sorted(missing_mappings)}"
+                )
+                
+            # Detect optional parameters that the integration doesn't consume
+            unmapped_optional = set(tool.optional_parameters) - mapped_parameters
+
+            if unmapped_optional:
+                raise ValueError(
+                    f"Tool '{tool.code}' has optional parameters "
+                    f"not mapped by integration '{integration.code}': "
+                    f"{sorted(unmapped_optional)}"
                 )
 
     # Validate entity definitions

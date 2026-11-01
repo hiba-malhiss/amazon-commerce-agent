@@ -1,4 +1,4 @@
-from app.schemas.config import EntityConfig
+from app.configurations.schemas import EntityConfig
 
 PRODUCT = EntityConfig(
     code="product",

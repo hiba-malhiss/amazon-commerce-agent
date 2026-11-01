@@ -4,8 +4,8 @@ from typing import Any
 import httpx
 from dotenv import load_dotenv
 
-from app.integrations.request_builder import build_api_request
-from app.schemas.config import APIIntegrationConfig, AuthenticationConfig
+from app.configurations.schemas import APIIntegrationConfig, AuthenticationConfig
+from app.execution.integrations.request_builder import build_api_request
 
 load_dotenv()
 

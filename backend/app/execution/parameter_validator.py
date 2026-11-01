@@ -1,6 +1,6 @@
 from typing import Any
 
-from app.schemas.config import ToolConfig
+from app.configurations.schemas import ToolConfig
 
 
 def get_missing_parameters(

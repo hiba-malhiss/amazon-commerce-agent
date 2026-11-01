@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from app.config.validator import validate_config
-from app.schemas.config import APIIntegrationConfig, ParameterConfig
+from app.configurations.schemas import APIIntegrationConfig, ParameterConfig
+from app.configurations.validator import validate_config
 
 
 def test_configuration_references():

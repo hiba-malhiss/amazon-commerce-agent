@@ -1,4 +1,4 @@
-from app.schemas.config import ToolConfig
+from app.configurations.schemas import ToolConfig
 
 SEARCH_PRODUCTS = ToolConfig(
     code="search_products",
@@ -6,10 +6,11 @@ SEARCH_PRODUCTS = ToolConfig(
     description="Search Amazon products matching user criteria",
     required_parameters=["query"],
     optional_parameters=[
-        "brand",
-        "category",
+#         "brand",
+#         "category",
         "min_price",
         "max_price",
+        "currency"
     ],
     integration_code="amazon_product_search",
 )

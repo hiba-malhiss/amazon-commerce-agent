@@ -3,11 +3,11 @@ from typing import Any
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.agent.prompts.understanding import UNDERSTANDING_PROMPT
+from app.agent.schemas.understanding import UnderstandingResult
 from app.agent.state import AgentState
-from app.config.parameters import PARAMETERS
-from app.config.tools.registry import TOOLS
+from app.configurations.parameters import PARAMETERS
+from app.configurations.tools.registry import TOOLS
 from app.llm.client import llm_client
-from app.schemas.understanding import UnderstandingResult
 
 
 async def understand_node(state: AgentState) -> dict[str, Any]:
@@ -52,10 +52,11 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
     if not isinstance(result, UnderstandingResult):
         raise ValueError("Invalid understanding result")
 
+    # The state reducer merges dictionaries, so convert the extracted list
+    extracted_parameters = {parameter.code: parameter.value for parameter in result.parameters}
+
     # LangGraph reducer handles parameter accumulation
     return {
-        "parameters": result.parameters,
-        "requests": [
-            request.model_dump() for request in result.requests
-        ],
+        "parameters": extracted_parameters,
+        "requests": [request.model_dump() for request in result.requests],
     }

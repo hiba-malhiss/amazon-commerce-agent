@@ -1,9 +1,9 @@
 
 import pytest
 
-from app.agent.entity_mapper import map_entities
-from app.config.integrations.amazon_product_search import AMAZON_PRODUCT_SEARCH
-from app.integrations.api_executor import execute_api
+from app.configurations.integrations.amazon_product_search import AMAZON_PRODUCT_SEARCH
+from app.execution.entity_mapper import map_entities
+from app.execution.integrations.api_executor import execute_api
 
 
 @pytest.mark.anyio
