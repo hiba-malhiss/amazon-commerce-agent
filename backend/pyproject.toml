@@ -3,6 +3,7 @@ name = "backend"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
+    "alembic>=1.20.1",
     "fastapi[standard]>=0.162.0",
     "httpx>=0.28.1",
     "langchain-openai>=1.7.3",
@@ -10,6 +11,7 @@ dependencies = [
     "langgraph-checkpoint-postgres>=3.2.0",
     "psycopg[binary]>=3.3.6",
     "python-dotenv>=1.2.4",
+    "sqlalchemy[asyncio]>=2.1.6",
 ]
 
 [dependency-groups]
