@@ -13,6 +13,7 @@ async def lifespan(app: FastAPI):
         app.state.agent_graph = build_graph(checkpointer)
         yield
 
+
 # Before yield → Runs once when the app starts.
 # After yield → Runs when the app shuts down.
 app = FastAPI(
@@ -20,8 +21,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
 
 app.include_router(threads_router)

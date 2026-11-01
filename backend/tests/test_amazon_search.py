@@ -1,4 +1,3 @@
-
 import pytest
 
 from app.configurations.integrations.amazon_product_search import AMAZON_PRODUCT_SEARCH

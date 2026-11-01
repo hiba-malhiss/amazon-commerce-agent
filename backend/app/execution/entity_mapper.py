@@ -36,10 +36,7 @@ def map_entities(
             continue
 
         # Map API fields to entity parameters
-        attributes = {
-            code: get_path(item, path)
-            for code, path in mapping.field_mapping.items()
-        }
+        attributes = {code: get_path(item, path) for code, path in mapping.field_mapping.items()}
 
         # Use the configured identifier when available
         identifier = (

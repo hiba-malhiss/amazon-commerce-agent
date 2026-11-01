@@ -53,7 +53,6 @@ class EntityMappingConfig(BaseModel):
     field_mapping: dict[ParameterCode, str] = Field(default_factory=dict)
 
 
-
 class AuthenticationConfig(BaseModel):
     type: Literal["none", "api_key", "basic"] = "none"
 
@@ -71,19 +70,14 @@ class AuthenticationConfig(BaseModel):
     def validate_auth(self) -> Self:
         if self.type == "api_key":
             if not self.key_name or not self.api_key_env:
-                raise ValueError(
-                    "API key authentication requires "
-                    "key_name and api_key_env"
-                )
+                raise ValueError("API key authentication requires key_name and api_key_env")
 
         elif self.type == "basic":
             if not self.username_env or not self.password_env:
-                raise ValueError(
-                    "Basic authentication requires "
-                    "username_env and password_env"
-                )
+                raise ValueError("Basic authentication requires username_env and password_env")
 
         return self
+
 
 # HTTP API integration
 class APIIntegrationConfig(IntegrationConfig):

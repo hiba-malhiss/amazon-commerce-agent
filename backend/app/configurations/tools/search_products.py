@@ -6,11 +6,11 @@ SEARCH_PRODUCTS = ToolConfig(
     description="Search Amazon products matching user criteria",
     required_parameters=["query"],
     optional_parameters=[
-#         "brand",
-#         "category",
+        #         "brand",
+        #         "category",
         "min_price",
         "max_price",
-        "currency"
+        "currency",
     ],
     integration_code="amazon_product_search",
 )

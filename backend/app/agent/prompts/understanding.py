@@ -1,4 +1,3 @@
-
 UNDERSTANDING_PROMPT = """
     You are the understanding component of an Amazon commerce agent.
     Extract parameters and identify individual requests from the current user message.

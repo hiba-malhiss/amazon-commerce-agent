@@ -18,14 +18,10 @@ def validate_config() -> None:
 
         for code in referenced:
             if code not in parameter_codes:
-                raise ValueError(
-                    f"Tool '{tool.code}' references unknown parameter '{code}'"
-                )
+                raise ValueError(f"Tool '{tool.code}' references unknown parameter '{code}'")
 
         if set(tool.required_parameters) & set(tool.optional_parameters):
-            raise ValueError(
-                f"Tool '{tool.code}' has overlapping required and optional parameters"
-            )
+            raise ValueError(f"Tool '{tool.code}' has overlapping required and optional parameters")
 
         if not tool.integration_code:
             continue
@@ -34,15 +30,13 @@ def validate_config() -> None:
 
         if integration is None:
             raise ValueError(
-                f"Tool '{tool.code}' references unknown integration "
-                f"'{tool.integration_code}'"
+                f"Tool '{tool.code}' references unknown integration '{tool.integration_code}'"
             )
 
         # Check required parameters against API mappings
         if isinstance(integration, APIIntegrationConfig):
-            mapped_parameters = (
-                set(integration.query_params.values())
-                | set(integration.payload.values())
+            mapped_parameters = set(integration.query_params.values()) | set(
+                integration.payload.values()
             )
 
             missing_mappings = set(tool.required_parameters) - mapped_parameters
@@ -53,7 +47,7 @@ def validate_config() -> None:
                     f"not mapped by integration '{integration.code}': "
                     f"{sorted(missing_mappings)}"
                 )
-                
+
             # Detect optional parameters that the integration doesn't consume
             unmapped_optional = set(tool.optional_parameters) - mapped_parameters
 
@@ -68,17 +62,13 @@ def validate_config() -> None:
     for entity in ENTITIES:
         for code in entity.parameters:
             if code not in parameter_codes:
-                raise ValueError(
-                    f"Entity '{entity.code}' references unknown parameter '{code}'"
-                )
+                raise ValueError(f"Entity '{entity.code}' references unknown parameter '{code}'")
 
         if (
             entity.identifier_parameter is not None
             and entity.identifier_parameter not in entity.parameters
         ):
-            raise ValueError(
-                f"Entity '{entity.code}' has an invalid identifier parameter"
-            )
+            raise ValueError(f"Entity '{entity.code}' has an invalid identifier parameter")
 
     # Validate integration configurations
     for integration in INTEGRATIONS:
@@ -92,8 +82,7 @@ def validate_config() -> None:
         for code in referenced:
             if code not in parameter_codes:
                 raise ValueError(
-                    f"Integration '{integration.code}' references "
-                    f"unknown parameter '{code}'"
+                    f"Integration '{integration.code}' references unknown parameter '{code}'"
                 )
 
         # Skip integrations without entity mapping

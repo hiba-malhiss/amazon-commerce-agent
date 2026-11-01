@@ -9,11 +9,7 @@ from app.agent.nodes.understand import understand_node
 async def main():
     # Simulate the current AgentState
     state = {
-        "messages": [
-            HumanMessage(
-                content="Find Samsung headphones under $100"
-            )
-        ],
+        "messages": [HumanMessage(content="Find Samsung headphones under $100")],
         "parameters": {},
         "entities": {},
         "requests": [],

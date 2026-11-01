@@ -9,6 +9,7 @@ def merge_parameters(
 ) -> dict[str, Any]:
     return {**old, **new}
 
+
 class AgentState(MessagesState):
     parameters: Annotated[dict[str, Any], merge_parameters]
     requests: list[dict[str, Any]]

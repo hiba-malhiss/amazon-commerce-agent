@@ -6,6 +6,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 load_dotenv()
 
+
 # Setup/open resources => yield (give it to caller) => clean up
 @asynccontextmanager
 async def postgres_checkpointer():
@@ -15,5 +16,5 @@ async def postgres_checkpointer():
         raise ValueError("DATABASE_URL is not configured")
 
     async with AsyncPostgresSaver.from_conn_string(database_url) as saver:
-        await saver.setup() # Creates or prepares checkpoint tables.
+        await saver.setup()  # Creates or prepares checkpoint tables.
         yield saver

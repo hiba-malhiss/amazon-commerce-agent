@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 load_dotenv()
 
+
 class LLMClient:
     def __init__(
         self,
@@ -24,9 +25,7 @@ class LLMClient:
         response_schema: type[BaseModel],
     ) -> Any:
         # Generate and validate structured LLM output
-        structured_llm = self.llm.with_structured_output(
-            response_schema
-        )
+        structured_llm = self.llm.with_structured_output(response_schema)
 
         return await structured_llm.ainvoke(messages)
 

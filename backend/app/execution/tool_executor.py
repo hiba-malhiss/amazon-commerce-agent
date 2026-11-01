@@ -52,6 +52,4 @@ async def execute_tool(
             "data": response,
         }
 
-    raise NotImplementedError(
-        f"Unsupported integration type: {type(integration).__name__}"
-    )
+    raise NotImplementedError(f"Unsupported integration type: {type(integration).__name__}")
