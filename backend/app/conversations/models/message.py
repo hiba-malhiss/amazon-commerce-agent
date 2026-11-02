@@ -39,6 +39,12 @@ class Message(Base):
         server_default=func.now(),
     )
 
+    thread_id: Mapped[UUID] = mapped_column(
+        ForeignKey("threads.id"),
+        nullable=False,
+        index=True,
+    )
+
     # extract from trace these are the id's
     entities: Mapped[list[str]] = mapped_column(
         JSONB,

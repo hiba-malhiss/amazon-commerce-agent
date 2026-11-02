@@ -50,6 +50,7 @@ class ConversationService:
         interaction = await self.interactions.create(thread_id)
 
         message = await self.messages.create(
+            thread_id=thread_id,
             interaction_id=interaction.id,
             role="user",
             content=user_message,
@@ -118,3 +119,15 @@ class ConversationService:
             ),
             assistant_message=None,
         )
+
+    async def get_thread_messages(
+        self,
+        thread_id: UUID,
+    ) -> list[Message]:
+        # Verify the conversation exists
+        thread = await self.threads.get_by_id(thread_id)
+
+        if thread is None:
+            raise ValueError(f"Thread '{thread_id}' not found")
+
+        return await self.messages.get_by_thread(thread_id)

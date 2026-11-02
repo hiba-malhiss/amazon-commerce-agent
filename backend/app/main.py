@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.agent.graph import build_graph
 from app.conversations.routes import router as conversations_router
+from app.conversations.websocket import router as websocket_router
 from app.database.checkpointer import postgres_checkpointer
 
 
@@ -28,3 +29,4 @@ async def health():
 
 
 app.include_router(conversations_router)
+app.include_router(websocket_router)
