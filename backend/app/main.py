@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.agent.graph import build_graph
-from app.conversations.routes import router as threads_router
+from app.conversations.routes import router as conversations_router
 from app.database.checkpointer import postgres_checkpointer
 
 
@@ -27,4 +27,4 @@ async def health():
     return {"status": "ok"}
 
 
-app.include_router(threads_router)
+app.include_router(conversations_router)

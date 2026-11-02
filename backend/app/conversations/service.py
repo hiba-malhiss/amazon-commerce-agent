@@ -1,0 +1,120 @@
+from typing import Any
+from uuid import UUID
+
+from langchain_core.messages import HumanMessage
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.conversations.models import Interaction, Message, Thread
+from app.conversations.repositories.interaction import InteractionRepository
+from app.conversations.repositories.message import MessageRepository
+from app.conversations.repositories.thread import ThreadRepository
+from app.conversations.schemas.interaction import InteractionResponse
+from app.conversations.schemas.message import (
+    MessageBody,
+    MessageContext,
+    MessageResponse,
+)
+
+
+class ConversationService:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+        self.threads = ThreadRepository(session)
+        self.interactions = InteractionRepository(session)
+        self.messages = MessageRepository(session)
+
+    async def get_or_create_thread(
+        self,
+        thread_id: UUID | None = None,
+    ) -> Thread:
+        # Create a new thread if no ID is provided
+        if thread_id is None:
+            thread = await self.threads.create()
+            await self.session.commit()
+            return thread
+
+        # Retrieve an existing thread
+        thread = await self.threads.get_by_id(thread_id)
+
+        if thread is None:
+            raise ValueError(f"Thread '{thread_id}' not found")
+
+        return thread
+
+    async def create_interaction(
+        self,
+        thread_id: UUID,
+        user_message: str,
+    ) -> tuple[Interaction, Message]:
+        # Create interaction and user message
+        interaction = await self.interactions.create(thread_id)
+
+        message = await self.messages.create(
+            interaction_id=interaction.id,
+            role="user",
+            content=user_message,
+        )
+
+        # Persist the incoming message before graph execution
+        await self.session.commit()
+
+        return interaction, message
+
+    async def process_message(
+        self,
+        graph: Any,
+        message: str,
+        thread_id: UUID | None = None,
+    ) -> InteractionResponse:
+        # Resolve or create conversation
+        thread = await self.get_or_create_thread(thread_id)
+
+        # Create interaction and persist user message
+        interaction, user_message = await self.create_interaction(
+            thread_id=thread.id,
+            user_message=message,
+        )
+
+        # Restore conversation state using thread ID
+        config = {
+            "configurable": {
+                "thread_id": str(thread.id),
+            }
+        }
+
+        # Execute the current LangGraph workflow
+        await graph.ainvoke(
+            {
+                "messages": [
+                    HumanMessage(
+                        content=message,
+                        id=str(user_message.id),
+                    )
+                ]
+            },
+            config=config,
+        )
+
+        # TODO: Retrieve generated response from AgentState
+        # TODO: Save assistant message with the same interaction_id
+        # TODO: Build and persist the interaction trace
+        # TODO: Update interaction status (completed / failed)
+
+        # Return interaction with the persisted user message
+        return InteractionResponse(
+            thread_id=thread.id,
+            interaction_id=interaction.id,
+            user_message=MessageResponse(
+                context=MessageContext(
+                    message_id=user_message.id,
+                    interaction_id=interaction.id,
+                    thread_id=thread.id,
+                    role="user",
+                ),
+                body=MessageBody(
+                    text=user_message.content,
+                    entities=user_message.entities,
+                ),
+            ),
+            assistant_message=None,
+        )
