@@ -1,17 +1,9 @@
-from typing import Annotated, Any
+from typing import Any
 
 from langgraph.graph import MessagesState
 
 
-def merge_parameters(
-    old: dict[str, Any],
-    new: dict[str, Any],
-) -> dict[str, Any]:
-    return {**old, **new}
-
-
 class AgentState(MessagesState):
-    parameters: Annotated[dict[str, Any], merge_parameters]
-    requests: list[dict[str, Any]]
+    active_request: dict[str, Any] | None
     entities: dict[str, Any]
-    tool_results: dict[str, Any]
+    requests: list[dict[str, Any]]

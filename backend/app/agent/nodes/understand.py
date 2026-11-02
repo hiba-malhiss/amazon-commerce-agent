@@ -1,3 +1,4 @@
+
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -11,7 +12,7 @@ from app.llm.client import llm_client
 
 
 async def understand_node(state: AgentState) -> dict[str, Any]:
-    # Load parameter and tool configurations
+    # Load configurations
     parameters = [p.model_dump() for p in PARAMETERS]
 
     tools = [
@@ -23,8 +24,8 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
         for t in TOOLS
     ]
 
-    # Read accumulated conversation context
-    known_parameters = state.get("parameters") or {}
+    # Read previous request summaries and known entities - from the prev message
+    previous_requests = state.get("recent_requests") or []
     known_entities = state.get("entities") or {}
 
     # Get only the latest user message
@@ -33,17 +34,17 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
     if not isinstance(last_user_message, HumanMessage):
         raise ValueError("Latest message must be a user message")
 
-    # Build the understanding prompt
+    # Build Understanding context
     system_message = SystemMessage(
         content=UNDERSTANDING_PROMPT.format(
             parameters=parameters,
             tools=tools,
-            known_parameters=known_parameters,
+            recent_requests=previous_requests[-8:],
             known_entities=list(known_entities.values()),
         )
     )
 
-    # Extract structured understanding using shared LLM client
+    # Extract requests without executing or merging parameters
     result = await llm_client.structured_completion(
         messages=[system_message, last_user_message],
         response_schema=UnderstandingResult,
@@ -52,11 +53,9 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
     if not isinstance(result, UnderstandingResult):
         raise ValueError("Invalid understanding result")
 
-    # The state reducer merges dictionaries, so convert the extracted list
-    extracted_parameters = {parameter.code: parameter.value for parameter in result.parameters}
-
-    # LangGraph reducer handles parameter accumulation
     return {
-        "parameters": extracted_parameters,
-        "requests": [request.model_dump() for request in result.requests],
+        "requests": [
+            request.model_dump()
+            for request in result.requests
+        ],
     }
