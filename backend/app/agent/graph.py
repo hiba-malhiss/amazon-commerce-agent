@@ -10,6 +10,7 @@ def build_graph(checkpointer):
 
     # Register Nodes
     graph.add_node("understand", understand_node)
+    graph.add_node("request_resolver", request_resolver_node)
 
     # Define execution order
     graph.add_edge(START, "understand")
