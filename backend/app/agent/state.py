@@ -24,5 +24,7 @@ class ToolRequestState(TypedDict):
     id: str
     request: ResolvedRequestData
     missing_parameters: NotRequired[list[str]]
-    next_step: NotRequired[Literal["integration", "missing_info", "fail"]]
+    result: NotRequired[dict[str, object]]
+    next_step: NotRequired[Literal["integration", "missing_info", "fail", "result_check"]]
     error: NotRequired[str]
+    outcome: NotRequired[Literal["missing_info", "success", "no_results", "fail"]]
