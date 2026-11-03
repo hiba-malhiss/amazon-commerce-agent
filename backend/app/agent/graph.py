@@ -2,7 +2,7 @@ from langgraph.graph import END, START, StateGraph
 
 from app.agent.nodes.collect import collect_node
 from app.agent.nodes.request_resolver import request_resolver_node
-# from app.agent.nodes.respond import respond_node
+from app.agent.nodes.respond import respond_node
 from app.agent.nodes.tool_workflow import tool_workflow_node
 from app.agent.nodes.understand import understand_node
 from app.agent.routing import dispatch_requests
@@ -17,7 +17,7 @@ def build_graph(checkpointer):
     graph.add_node("request_resolver", request_resolver_node)
     graph.add_node("tool_workflow", tool_workflow_node)
     graph.add_node("collect", collect_node)
-#     graph.add_node("respond", respond_node)
+    graph.add_node("respond", respond_node)
 
     # Understand and resolve requests
     graph.add_edge(START, "understand")
