@@ -1,18 +1,21 @@
 import httpx
-from app.execution.schemas import ToolResult, ToolResultStatus
 
+from app.agent.schemas.resolution import RequestOutcome
 from app.agent.state import ToolRequestState
 from app.configurations.integrations.registry import INTEGRATIONS_BY_CODE
 from app.configurations.schemas import APIIntegrationConfig
 from app.configurations.tools.registry import TOOLS_BY_CODE
 from app.execution.entity_mapper import map_entities
 from app.execution.integrations.api_executor import execute_api
+from app.execution.schemas import ToolResult, ToolResultStatus
 
 
-async def integration_node(state: ToolRequestState) -> dict:
+async def integration_node(
+    state: ToolRequestState,
+) -> dict[str, RequestOutcome]:
     request = state["request"]
 
-    # Resolve the configured integration
+    # Resolve integration configuration
     tool = TOOLS_BY_CODE.get(request["tool"])
     integration = INTEGRATIONS_BY_CODE.get(tool.integration_code) if tool else None
 
@@ -44,7 +47,17 @@ async def integration_node(state: ToolRequestState) -> dict:
             error=str(exc),
         )
 
+    # Return the request's final outcome
     return {
-        "result": result.model_dump(),
-        "next_step": "result_check",
+        "outcome": {
+            "id": state["id"],
+            "status": ("success" if result.status == ToolResultStatus.COMPLETED else "fail"),
+            "result": (
+                result.model_dump(mode="json")["data"]
+                if result.status == ToolResultStatus.COMPLETED
+                else None
+            ),
+            "missing_parameters": [],
+            "error": result.error,
+        }
     }

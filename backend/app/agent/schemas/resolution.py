@@ -34,3 +34,11 @@ class RequestHistoryEntry(TypedDict):
     parameters: dict[str, ParameterValue]
     entities: list[str]
     status: Literal["ready"]
+
+
+class RequestOutcome(TypedDict):
+    id: str
+    status: Literal["success", "fail", "missing_info"]
+    result: dict[str, object] | None
+    missing_parameters: list[str]
+    error: str | None

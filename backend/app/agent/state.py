@@ -1,9 +1,11 @@
-from typing import Any, Literal, NotRequired, TypedDict
+import operator
+from typing import Annotated, Any, Literal, NotRequired, TypedDict
 
 from langgraph.graph import MessagesState
 
 from app.agent.schemas.resolution import (
     RequestHistoryEntry,
+    RequestOutcome,
     ResolvedRequest,
     ResolvedRequestData,
 )
@@ -18,6 +20,7 @@ class AgentState(MessagesState):
     requests: list[dict[str, Any]]
     resolved_requests: list[ResolvedRequest]
     recent_requests: list[RequestHistoryEntry]
+    outcomes: Annotated[list[RequestOutcome], operator.add]
 
 
 class ToolRequestState(TypedDict):
@@ -25,6 +28,6 @@ class ToolRequestState(TypedDict):
     request: ResolvedRequestData
     missing_parameters: NotRequired[list[str]]
     result: NotRequired[dict[str, object]]
-    next_step: NotRequired[Literal["integration", "missing_info", "fail", "result_check"]]
+    next_step: NotRequired[Literal["integration", "missing_info", "success", "fail"]]
     error: NotRequired[str]
-    outcome: NotRequired[Literal["missing_info", "success", "no_results", "fail"]]
+    outcome: NotRequired[RequestOutcome]

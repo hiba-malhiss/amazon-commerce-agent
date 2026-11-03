@@ -1,6 +1,7 @@
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
+from langgraph.types import Overwrite
 
 from app.agent.prompts.understanding import UNDERSTANDING_PROMPT
 from app.agent.schemas.understanding import UnderstandingResult
@@ -54,4 +55,6 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
 
     return {
         "requests": [request.model_dump() for request in result.requests],
+        "resolved_requests": [],
+        "outcomes": Overwrite([]),
     }
