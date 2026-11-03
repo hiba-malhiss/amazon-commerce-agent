@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class ExtractedParameter(BaseModel):
     model_config = ConfigDict(extra="forbid")
     code: str
-    operation: Literal["set", "remove", "relative"] = "set"
+    operation: Literal["set", "remove"] = "set"
     value: str | int | float | bool | None = None
 
 
@@ -16,9 +16,7 @@ class Request(BaseModel):
     tool: str
     entities: list[str] = Field(default_factory=list)
     parameters: list[ExtractedParameter] = Field(default_factory=list)
-    relation: Literal[
-        "new", "follow_up", "ambiguous", "cancel"
-    ] = "new"
+    relation: Literal["new", "follow_up", "ambiguous"] = "new"
     source_request_id: str | None = None
 
 

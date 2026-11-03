@@ -13,6 +13,7 @@ def build_graph(checkpointer):
 
     # Define execution order
     graph.add_edge(START, "understand")
-    graph.add_edge("understand", END)
+    graph.add_edge("understand", "request_resolver")
+    graph.add_edge("request_resolver", END)
 
     return graph.compile(checkpointer=checkpointer)

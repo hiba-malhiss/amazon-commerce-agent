@@ -23,7 +23,6 @@ UNDERSTANDING_PROMPT = """
     Request relationships:
     - new: Independent request with its own parameters.
     - follow_up: Modify an existing request.
-    - cancel: Cancel a referenced previous request.
     - ambiguous: Cannot reliably identify the referenced request.
 
     References:
@@ -40,7 +39,6 @@ UNDERSTANDING_PROMPT = """
     Parameter operations:
     - set: Add or replace a parameter value.
     - remove: Remove an existing parameter; value = null.
-    - relative: Express a relative change, such as "cheaper".
     - Extract only changed parameters for follow-ups.
     - For new independent requests, extract their own parameters.
     - Do not merge, calculate, or validate parameter values.

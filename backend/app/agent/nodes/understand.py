@@ -1,4 +1,3 @@
-
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -54,8 +53,5 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
         raise ValueError("Invalid understanding result")
 
     return {
-        "requests": [
-            request.model_dump()
-            for request in result.requests
-        ],
+        "requests": [request.model_dump() for request in result.requests],
     }
