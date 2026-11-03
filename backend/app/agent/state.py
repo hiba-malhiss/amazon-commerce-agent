@@ -1,11 +1,13 @@
-from typing import Any
+from typing import Any, Literal, NotRequired, TypedDict
 
 from langgraph.graph import MessagesState
 
 from app.agent.schemas.resolution import (
     RequestHistoryEntry,
     ResolvedRequest,
+    ResolvedRequestData,
 )
+
 
 # entities — Previously retrieved products.
 # requests — Raw requests extracted by Understanding.
@@ -16,3 +18,11 @@ class AgentState(MessagesState):
     requests: list[dict[str, Any]]
     resolved_requests: list[ResolvedRequest]
     recent_requests: list[RequestHistoryEntry]
+
+
+class ToolRequestState(TypedDict):
+    id: str
+    request: ResolvedRequestData
+    missing_parameters: NotRequired[list[str]]
+    next_step: NotRequired[Literal["integration", "missing_info", "fail"]]
+    error: NotRequired[str]
