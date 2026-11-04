@@ -8,6 +8,7 @@ from app.core.settings import settings
 class LLMClient:
     def __init__(self):
         self.llm = ChatOpenAI(
+            api_key=settings.openai_api_key.get_secret_value(),
             model=settings.llm_model,
             temperature=0,
             max_tokens=settings.llm_max_output_tokens,

@@ -1,11 +1,12 @@
 import os
-from typing import Any
 
 import httpx
 from dotenv import load_dotenv
+from pydantic import JsonValue
 
 from app.configurations.schemas import APIIntegrationConfig, AuthenticationConfig
 from app.execution.integrations.request_builder import build_api_request
+from app.execution.schemas import ParameterValue
 
 load_dotenv()
 
@@ -47,8 +48,8 @@ def resolve_auth(
 
 async def execute_api(
     integration: APIIntegrationConfig,
-    parameters: dict[str, Any],
-) -> dict[str, Any]:
+    parameters: dict[str, ParameterValue],
+) -> dict[str, JsonValue]:
     # Build the configured API request
     request = build_api_request(integration, parameters)
 
@@ -65,4 +66,11 @@ async def execute_api(
         )
 
         response.raise_for_status()
-        return response.json()
+        body: JsonValue = response.json()
+
+    # Integrations must return a JSON object; anything else is a failed call
+    if not isinstance(body, dict):
+        raise TypeError(
+            f"Expected a JSON object from {integration.code}, got {type(body).__name__}"
+        )
+    return body

@@ -1,11 +1,13 @@
-from typing import Any
 from uuid import uuid4
+
+from pydantic import JsonValue
 
 from app.configurations.entities.registry import ENTITIES_BY_CODE
 from app.configurations.schemas import EntityMappingConfig
+from app.execution.schemas import MappedEntity
 
 
-def get_path(data: dict, path: str) -> Any:
+def get_path(data: JsonValue, path: str) -> JsonValue:
     # Read nested API response fields
     value = data
 
@@ -19,9 +21,9 @@ def get_path(data: dict, path: str) -> Any:
 
 
 def map_entities(
-    response: dict[str, Any],
+    response: dict[str, JsonValue],
     mapping: EntityMappingConfig,
-) -> list[dict[str, Any]]:
+) -> list[MappedEntity]:
     entity_config = ENTITIES_BY_CODE[mapping.entity_code]
 
     items = get_path(response, mapping.collection_path)
@@ -29,7 +31,7 @@ def map_entities(
     if not isinstance(items, list):
         return []
 
-    entities = []
+    entities: list[MappedEntity] = []
 
     for index, item in enumerate(items):
         if not isinstance(item, dict):
@@ -45,7 +47,7 @@ def map_entities(
             else None
         )
 
-        if identifier is None or identifier == "":
+        if identifier is None or identifier == "" or isinstance(identifier, (list, dict)):
             identifier = uuid4().hex
 
         entities.append(

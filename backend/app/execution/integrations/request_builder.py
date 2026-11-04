@@ -1,14 +1,13 @@
-from typing import Any
-
 from app.configurations.schemas import APIIntegrationConfig
+from app.execution.schemas import ApiRequest, ParameterValue
 
 
 def build_api_request(
     integration: APIIntegrationConfig,
-    parameters: dict[str, Any],
-) -> dict[str, Any]:
+    parameters: dict[str, ParameterValue],
+) -> ApiRequest:
     # Map API field names to extracted parameter values
-    def resolve(mapping: dict[str, str]) -> dict[str, Any]:
+    def resolve(mapping: dict[str, str]) -> dict[str, ParameterValue]:
         return {
             api_field: parameters[parameter_code]
             for api_field, parameter_code in mapping.items()

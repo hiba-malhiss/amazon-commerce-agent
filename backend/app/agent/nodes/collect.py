@@ -1,8 +1,8 @@
 from app.agent.schemas.resolution import RequestOutcome
-from app.agent.state import AgentState
+from app.agent.state import AgentState, AgentStateUpdate
 
 
-def collect_node(state: AgentState) -> dict[str, list[RequestOutcome]]:
+def collect_node(state: AgentState) -> AgentStateUpdate:
     outcomes_by_id = {outcome["id"]: outcome for outcome in state.get("outcomes", [])}
     collected: list[RequestOutcome] = []
 

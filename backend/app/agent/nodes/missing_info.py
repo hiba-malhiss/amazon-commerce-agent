@@ -1,10 +1,7 @@
-from app.agent.schemas.resolution import RequestOutcome
-from app.agent.state import ToolRequestState
+from app.agent.state import ToolRequestState, ToolRequestUpdate
 
 
-def missing_info_node(
-    state: ToolRequestState,
-) -> dict[str, RequestOutcome]:
+def missing_info_node(state: ToolRequestState) -> ToolRequestUpdate:
     # Return the missing parameter outcome
     return {
         "outcome": {

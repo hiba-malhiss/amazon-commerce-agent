@@ -1,21 +1,29 @@
 from typing import Literal, TypedDict
 
-type ParameterValue = str | int | float | bool
+from app.execution.schemas import MappedEntity, ParameterValue
+
+type Relation = Literal["new", "follow_up", "ambiguous"]
 
 
-class ResolvedRequestData(TypedDict):
+class ExtractedParameterData(TypedDict):
+    code: str
+    operation: Literal["set", "remove"]
+    value: ParameterValue | None
+
+
+class UnderstoodRequestData(TypedDict):
     question: str
     tool: str
     entities: list[str]
-    parameters: dict[str, ParameterValue]
-    relation: Literal["new", "follow_up", "ambiguous"]
+    parameters: list[ExtractedParameterData]
+    relation: Relation
     source_request_id: str | None
 
 
 class ReadyRequest(TypedDict):
     id: str
     status: Literal["ready"]
-    request: ResolvedRequestData
+    request: UnderstoodRequestData
 
 
 class ClarificationRequest(TypedDict):
@@ -27,18 +35,13 @@ class ClarificationRequest(TypedDict):
 type ResolvedRequest = ReadyRequest | ClarificationRequest
 
 
-class RequestHistoryEntry(TypedDict):
-    id: str
-    question: str
-    tool: str
-    parameters: dict[str, ParameterValue]
-    entities: list[str]
-    status: Literal["ready"]
+class OutcomeResult(TypedDict):
+    entities: list[MappedEntity]
 
 
 class RequestOutcome(TypedDict):
     id: str
-    status: Literal["success", "fail", "missing_info"]
-    result: dict[str, object] | None
+    status: Literal["success", "fail", "missing_info", "needs_clarification"]
+    result: OutcomeResult | None
     missing_parameters: list[str]
     error: str | None

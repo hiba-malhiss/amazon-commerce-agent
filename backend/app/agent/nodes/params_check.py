@@ -1,9 +1,9 @@
-from app.agent.state import ToolRequestState
+from app.agent.state import ToolRequestState, ToolRequestUpdate
 from app.configurations.tools.registry import TOOLS_BY_CODE
 from app.execution.parameter_validator import get_missing_parameters
 
 
-def params_check_node(state: ToolRequestState) -> dict:
+def params_check_node(state: ToolRequestState) -> ToolRequestUpdate:
     # Get the current request
     request = state["request"]
     tool = TOOLS_BY_CODE.get(request["tool"])
@@ -11,14 +11,12 @@ def params_check_node(state: ToolRequestState) -> dict:
     if tool is None:
         return {
             "next_step": "fail",
+            "missing_parameters": [],
             "error": f"Unknown tool: {request['tool']}",
         }
 
     # Validate required parameters
-    missing = get_missing_parameters(
-        tool,
-        request["parameters"],
-    )
+    missing = get_missing_parameters(tool, request["parameters"])
 
     # Select the next workflow step
     return {

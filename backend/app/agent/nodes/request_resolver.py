@@ -1,33 +1,34 @@
-from typing import Any
 from uuid import uuid4
 
 from app.agent.schemas.resolution import (
-    RequestHistoryEntry,
+    ParameterValue,
+    UnderstoodRequestData,
     ResolvedRequest,
+    UnderstoodRequestData,
 )
-from app.agent.schemas.understanding import Request
-from app.agent.state import AgentState
+from app.agent.state import AgentState, AgentStateUpdate
+from app.core.settings import settings
 
 
-# merge parameters for the follow up request and validate requests
-def request_resolver_node(state: AgentState) -> dict[str, Any]:
+# Merge parameters for follow-up requests and validate references
+def request_resolver_node(state: AgentState) -> AgentStateUpdate:
     # Load previous requests
-    history: list[RequestHistoryEntry] = list(state.get("recent_requests", []))
+    history: list[UnderstoodRequestData] = list(state.get("recent_requests", []))
 
-    previous_by_id: dict[str, RequestHistoryEntry] = {item["id"]: item for item in history}
+    previous_by_id: dict[str, UnderstoodRequestData] = {item["id"]: item for item in history}
     resolved_requests: list[ResolvedRequest] = []
 
-    for raw_request in state.get("requests", []):
-        request = Request.model_validate(raw_request)
+    for request in state.get("requests", []):
         request_id = uuid4().hex
+        source_id = request["source_request_id"]
 
         # Find the referenced request
-        previous = previous_by_id.get(request.source_request_id)
+        previous = previous_by_id.get(source_id) if source_id else None
 
         if (
-            request.relation == "ambiguous"
-            or (request.source_request_id and previous is None)
-            or (request.relation == "follow_up" and previous is None)
+            request["relation"] == "ambiguous"
+            or (source_id and previous is None)
+            or (request["relation"] == "follow_up" and previous is None)
         ):
             resolved_requests.append(
                 {
@@ -39,7 +40,7 @@ def request_resolver_node(state: AgentState) -> dict[str, Any]:
             continue
 
         # Start with referenced parameters, if any
-        parameters = previous["parameters"].copy() if previous else {}
+        parameters: dict[str, ParameterValue] = dict(previous["parameters"]) if previous else {}
 
         for param in request.parameters:
             if param.operation == "set" and param.value is not None:
@@ -49,21 +50,16 @@ def request_resolver_node(state: AgentState) -> dict[str, Any]:
                 parameters.pop(param.code, None)
 
         # Prepare the resolved request
-        resolved = {
+        resolved: UnderstoodRequestData = {
             **request.model_dump(),
             "parameters": parameters,
+            "source_request_id": source_id,
         }
 
-        resolved_requests.append(
-            {
-                "id": request_id,
-                "status": "ready",
-                "request": resolved,
-            }
-        )
+        resolved_requests.append({"id": request_id, "status": "ready", "request": resolved})
 
         # Save for future follow-ups
-        summary = {
+        summary: UnderstoodRequestData = {
             "id": request_id,
             "question": request.question,
             "tool": request.tool,
@@ -77,5 +73,5 @@ def request_resolver_node(state: AgentState) -> dict[str, Any]:
 
     return {
         "resolved_requests": resolved_requests,
-        "recent_requests": history[-8:],
+        "recent_requests": history[-settings.max_recent_requests :],
     }

@@ -1,34 +1,24 @@
-from typing import Any
-
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.messages.utils import count_tokens_approximately
 from langgraph.types import Overwrite
 
 from app.agent.prompts.understanding import UNDERSTANDING_PROMPT
 from app.agent.schemas.understanding import UnderstandingResult
-from app.agent.state import AgentState
+from app.agent.state import AgentState, AgentStateUpdate
 from app.configurations.parameters import PARAMETERS
 from app.configurations.tools.registry import TOOLS
 from app.core.settings import settings
 from app.llm.client import llm_client
 
 
-async def understand_node(state: AgentState) -> dict[str, Any]:
+async def understand_node(state: AgentState) -> AgentStateUpdate:
     # Load configurations
     parameters = [p.model_dump() for p in PARAMETERS]
+    tools = [{"code": t.code, "name": t.name, "description": t.description} for t in TOOLS]
 
-    tools = [
-        {
-            "code": t.code,
-            "name": t.name,
-            "description": t.description,
-        }
-        for t in TOOLS
-    ]
-
-    # Load recent requests and known entities
+    # Load recent requests (newest first) and known entities
     recent_requests = state.get("recent_requests", [])[-settings.max_recent_requests :][::-1]
-    known_entities = state.get("entities") or {}
+    known_entities = state.get("entities", {})
 
     # Get only the latest user message
     last_user_message = state["messages"][-1]
@@ -61,9 +51,11 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
     if not isinstance(result, UnderstandingResult):
         raise ValueError("Invalid understanding result")
 
+    # Start a new turn: reset everything that belongs to the current message
     return {
         "requests": [request.model_dump() for request in result.requests],
         "resolved_requests": [],
         "outcomes": Overwrite([]),
         "collected_outcomes": [],
+        "reply": None,
     }

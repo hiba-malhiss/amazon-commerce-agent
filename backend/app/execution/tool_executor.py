@@ -1,5 +1,3 @@
-from typing import Any
-
 import httpx
 
 from app.configurations.integrations.registry import INTEGRATIONS_BY_CODE
@@ -8,12 +6,12 @@ from app.configurations.tools.registry import TOOLS_BY_CODE
 from app.execution.entity_mapper import map_entities
 from app.execution.integrations.api_executor import execute_api
 from app.execution.parameter_validator import get_missing_parameters
-from app.execution.schemas import ToolResult, ToolResultStatus
+from app.execution.schemas import ParameterValue, ToolResult, ToolResultData, ToolResultStatus
 
 
 async def execute_tool(
     tool_code: str,
-    parameters: dict[str, Any],
+    parameters: dict[str, ParameterValue],
 ) -> ToolResult:
     # Resolve tool configuration
     tool = TOOLS_BY_CODE.get(tool_code)
@@ -34,7 +32,7 @@ async def execute_tool(
         )
 
     # Resolve integration configuration
-    integration = INTEGRATIONS_BY_CODE.get(tool.integration_code)
+    integration = INTEGRATIONS_BY_CODE.get(tool.integration_code) if tool.integration_code else None
 
     if integration is None:
         return ToolResult(
@@ -55,7 +53,7 @@ async def execute_tool(
 
             return ToolResult(
                 status=ToolResultStatus.COMPLETED,
-                data={"entities": entities},
+                data=ToolResultData(entities=entities),
             )
 
         return ToolResult(
