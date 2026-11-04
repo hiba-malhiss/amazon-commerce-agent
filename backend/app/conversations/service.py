@@ -86,7 +86,7 @@ class ConversationService:
         }
 
         # Execute the current LangGraph workflow
-        await graph.ainvoke(
+        final_state = await graph.ainvoke(
             {
                 "messages": [
                     HumanMessage(
@@ -97,11 +97,16 @@ class ConversationService:
             },
             config=config,
         )
+        last_message = final_state["messages"][-1]
+        reply = last_message.content
+        assistant_message = await self.messages.create(
+            thread_id=thread.id,
+            interaction_id=interaction.id,
+            role="assistant",
+            content=reply,
+        )
 
-        # TODO: Retrieve generated response from AgentState
-        # TODO: Save assistant message with the same interaction_id
-        # TODO: Build and persist the interaction trace
-        # TODO: Update interaction status (completed / failed)
+        await self.session.commit()
 
         # Return interaction with the persisted user message
         return InteractionResponse(
@@ -119,7 +124,18 @@ class ConversationService:
                     entities=user_message.entities,
                 ),
             ),
-            assistant_message=None,
+            assistant_message=MessageResponse(
+                context=MessageContext(
+                    message_id=assistant_message.id,
+                    interaction_id=interaction.id,
+                    thread_id=thread.id,
+                    role="assistant",
+                ),
+                body=MessageBody(
+                    text=assistant_message.content,
+                    entities=assistant_message.entities,
+                ),
+            ),
         )
 
     async def get_thread_messages(

@@ -25,7 +25,6 @@ class AgentState(MessagesState):
     resolved_requests: list[ResolvedRequest]  # after parameter merging
     outcomes: Annotated[list[RequestOutcome], operator.add]  # one per parallel branch
     collected_outcomes: list[RequestOutcome]  # outcomes in request order
-    reply: str | None
 
 
 class AgentStateUpdate(TypedDict, total=False):
@@ -39,7 +38,6 @@ class AgentStateUpdate(TypedDict, total=False):
     # list → appended (operator.add); Overwrite → replaced, used to reset each message
     outcomes: list[RequestOutcome] | Overwrite
     collected_outcomes: list[RequestOutcome]
-    reply: str | None
 
 
 type ToolStep = Literal["integration", "missing_info", "fail"]

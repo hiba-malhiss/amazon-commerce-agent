@@ -16,7 +16,6 @@ def fallback_response() -> AgentStateUpdate:
     message = "Sorry, I couldn't complete your request right now. Please try again."
 
     return {
-        "reply": message,
         "messages": [AIMessage(content=message)],
     }
 
@@ -67,6 +66,5 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
 
     # Save the reply in LangGraph state
     return {
-        "reply": response.content,
         "messages": [AIMessage(content=response.content)],
     }

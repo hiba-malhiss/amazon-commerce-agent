@@ -25,7 +25,6 @@ def understanding_failed(reason: str) -> AgentStateUpdate:
                 "error": reason,
             }
         ],
-        "reply": None,
     }
 
 
@@ -78,5 +77,4 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
         "resolved_requests": [],
         "outcomes": Overwrite([]),
         "collected_outcomes": [],
-        "reply": None,
     }
