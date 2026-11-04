@@ -23,7 +23,13 @@ def collect_node(state: AgentState) -> AgentStateUpdate:
         outcome = outcomes_by_id.get(request["id"])
 
         if outcome is None:
-            raise ValueError(f"Missing outcome for {request['id']}")
+            outcome: RequestOutcome = {
+                "id": request["id"],
+                "status": "fail",
+                "result": None,
+                "missing_parameters": [],
+                "error": "Request completed without an outcome",
+            }
 
         collected.append(outcome)
 

@@ -11,6 +11,24 @@ from app.core.settings import settings
 from app.llm.client import llm_client
 
 
+def understanding_failed(reason: str) -> AgentStateUpdate:
+    return {
+        "requests": [],
+        "resolved_requests": [],
+        "outcomes": Overwrite([]),
+        "collected_outcomes": [
+            {
+                "id": "understand",
+                "status": "fail",
+                "result": None,
+                "missing_parameters": [],
+                "error": reason,
+            }
+        ],
+        "reply": None,
+    }
+
+
 async def understand_node(state: AgentState) -> AgentStateUpdate:
     # Load configurations
     parameters = [p.model_dump() for p in PARAMETERS]
@@ -24,7 +42,7 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
     last_user_message = state["messages"][-1]
 
     if not isinstance(last_user_message, HumanMessage):
-        raise ValueError("Latest message must be a user message")
+        return understanding_failed("Invalid user message")
 
     # Build Understanding context
     system_message = SystemMessage(
@@ -40,16 +58,19 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
 
     # Check the input token budget
     if count_tokens_approximately(messages) > settings.max_understanding_input_tokens:
-        raise ValueError("Understanding input exceeds token budget")
+        return understanding_failed("Understanding input exceeds token budget")
 
     # Extract structured requests
-    result = await llm_client.structured_completion(
-        messages=messages,
-        response_schema=UnderstandingResult,
-    )
+    try:
+        result = await llm_client.structured_completion(
+            messages=messages,
+            response_schema=UnderstandingResult,
+        )
+    except Exception:
+        return understanding_failed("Unable to process the request")
 
     if not isinstance(result, UnderstandingResult):
-        raise ValueError("Invalid understanding result")
+        return understanding_failed("Invalid understanding result")
 
     # Start a new turn: reset everything that belongs to the current message
     return {

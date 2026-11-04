@@ -12,6 +12,15 @@ from app.core.settings import settings
 from app.llm.client import llm_client
 
 
+def fallback_response() -> AgentStateUpdate:
+    message = "Sorry, I couldn't complete your request right now. Please try again."
+
+    return {
+        "reply": message,
+        "messages": [AIMessage(content=message)],
+    }
+
+
 async def respond_node(state: AgentState) -> AgentStateUpdate:
     # Limit conversation history by messages and tokens
     recent_messages = trim_messages(
@@ -45,13 +54,16 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
 
     # Check the total input budget
     if count_tokens_approximately(messages) > settings.max_response_input_tokens:
-        raise ValueError("Response input exceeds token budget")
+        return fallback_response()
 
     # Generate one response
-    response = await llm_client.llm.ainvoke(messages)
+    try:
+        response = await llm_client.llm.ainvoke(messages)
+    except Exception:
+        return fallback_response()
 
     if not isinstance(response.content, str):
-        raise ValueError("Expected a text response")
+        return fallback_response()
 
     # Save the reply in LangGraph state
     return {

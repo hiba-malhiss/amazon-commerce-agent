@@ -1,28 +1,42 @@
 from uuid import uuid4
 
 from app.agent.schemas.resolution import (
-    ParameterValue,
-    UnderstoodRequestData,
+    ReadyRequest,
     ResolvedRequest,
-    UnderstoodRequestData,
+    ResolvedRequestData,
 )
 from app.agent.state import AgentState, AgentStateUpdate
 from app.core.settings import settings
+from app.execution.schemas import ParameterValue
 
 
-# Merge parameters for follow-up requests and validate references
 def request_resolver_node(state: AgentState) -> AgentStateUpdate:
-    # Load previous requests
-    history: list[UnderstoodRequestData] = list(state.get("recent_requests", []))
 
-    previous_by_id: dict[str, UnderstoodRequestData] = {item["id"]: item for item in history}
+    # Load previous resolved requests
+    history: list[ReadyRequest] = list(state.get("recent_requests", []))
+
+    previous_by_id: dict[str, ReadyRequest] = {item["id"]: item for item in history}
+
     resolved_requests: list[ResolvedRequest] = []
+    requests = state.get("requests", [])
 
-    for request in state.get("requests", []):
+    # Check request limit
+    if len(requests) > settings.max_requests_per_turn:
+        return {
+            "resolved_requests": [
+                {
+                    "id": uuid4().hex,
+                    "status": "needs_clarification",
+                    "error": "Too many requests. Ask the user to prioritize.",
+                }
+            ]
+        }
+
+    for request in requests:
         request_id = uuid4().hex
         source_id = request["source_request_id"]
 
-        # Find the referenced request
+        # Find the referenced previous request
         previous = previous_by_id.get(source_id) if source_id else None
 
         if (
@@ -39,37 +53,40 @@ def request_resolver_node(state: AgentState) -> AgentStateUpdate:
             )
             continue
 
-        # Start with referenced parameters, if any
-        parameters: dict[str, ParameterValue] = dict(previous["parameters"]) if previous else {}
+        # Inherit previous parameters
+        parameters: dict[str, ParameterValue] = (
+            dict(previous["request"]["parameters"]) if previous else {}
+        )
 
-        for param in request.parameters:
-            if param.operation == "set" and param.value is not None:
-                parameters[param.code] = param.value
+        # Apply parameter changes
+        for param in request["parameters"]:
+            if param["operation"] == "set" and param["value"] is not None:
+                parameters[param["code"]] = param["value"]
 
-            elif param.operation == "remove":
-                parameters.pop(param.code, None)
+            elif param["operation"] == "remove":
+                parameters.pop(param["code"], None)
 
-        # Prepare the resolved request
-        resolved: UnderstoodRequestData = {
-            **request.model_dump(),
+        # Build resolved request
+        resolved: ResolvedRequestData = {
+            "question": request["question"],
+            "tool": request["tool"],
+            "entities": request["entities"],
             "parameters": parameters,
+            "relation": request["relation"],
             "source_request_id": source_id,
         }
 
-        resolved_requests.append({"id": request_id, "status": "ready", "request": resolved})
-
-        # Save for future follow-ups
-        summary: UnderstoodRequestData = {
+        ready_request: ReadyRequest = {
             "id": request_id,
-            "question": request.question,
-            "tool": request.tool,
-            "parameters": parameters,
-            "entities": request.entities,
             "status": "ready",
+            "request": resolved,
         }
 
-        history.append(summary)
-        previous_by_id[request_id] = summary
+        resolved_requests.append(ready_request)
+
+        # Save same request for future follow-ups
+        history.append(ready_request)
+        previous_by_id[request_id] = ready_request
 
     return {
         "resolved_requests": resolved_requests,

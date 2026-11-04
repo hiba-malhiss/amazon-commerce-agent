@@ -11,8 +11,13 @@ def params_check_node(state: ToolRequestState) -> ToolRequestUpdate:
     if tool is None:
         return {
             "next_step": "fail",
-            "missing_parameters": [],
-            "error": f"Unknown tool: {request['tool']}",
+            "outcome": {
+                "id": state["id"],
+                "status": "fail",
+                "result": None,
+                "missing_parameters": [],
+                "error": f"Unknown tool: {request['tool']}",
+            },
         }
 
     # Validate required parameters

@@ -21,7 +21,21 @@ def build_graph(checkpointer):
 
     # Understand and resolve requests
     graph.add_edge(START, "understand")
-    graph.add_edge("understand", "request_resolver")
+    graph.add_conditional_edges(
+        "understand",
+        lambda state: (
+            "respond"
+            if any(
+                outcome["id"] == "understand" and outcome["status"] == "fail"
+                for outcome in state.get("collected_outcomes", [])
+            )
+            else "request_resolver"
+        ),
+        {
+            "respond": "respond",
+            "request_resolver": "request_resolver",
+        },
+    )
 
     # Dispatch requests in parallel
     graph.add_conditional_edges(

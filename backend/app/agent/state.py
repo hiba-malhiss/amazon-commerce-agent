@@ -6,9 +6,10 @@ from langgraph.graph import MessagesState
 from langgraph.types import Overwrite
 
 from app.agent.schemas.resolution import (
-    UnderstoodRequestData,
+    ReadyRequest,
     RequestOutcome,
     ResolvedRequest,
+    ResolvedRequestData,
     UnderstoodRequestData,
 )
 from app.execution.schemas import MappedEntity
@@ -17,7 +18,7 @@ from app.execution.schemas import MappedEntity
 class AgentState(MessagesState):
     # Persistent across messages
     entities: dict[str, MappedEntity]  # previously retrieved products, by reference
-    recent_requests: list[UnderstoodRequestData]  # resolved requests, for follow-ups
+    recent_requests: list[ReadyRequest]  # resolved requests, for follow-ups
 
     # Current message only (reset by `understand`)
     requests: list[UnderstoodRequestData]  # raw requests from Understanding
@@ -32,7 +33,7 @@ class AgentStateUpdate(TypedDict, total=False):
 
     messages: list[AnyMessage]
     entities: dict[str, MappedEntity]
-    recent_requests: list[UnderstoodRequestData]
+    recent_requests: list[ReadyRequest]
     requests: list[UnderstoodRequestData]
     resolved_requests: list[ResolvedRequest]
     # list → appended (operator.add); Overwrite → replaced, used to reset each message
@@ -46,7 +47,7 @@ type ToolStep = Literal["integration", "missing_info", "fail"]
 
 class ToolRequestState(TypedDict):
     id: str
-    request: UnderstoodRequestData
+    request: ResolvedRequestData
     missing_parameters: NotRequired[list[str]]
     next_step: NotRequired[ToolStep]
     error: NotRequired[str]

@@ -20,10 +20,19 @@ class UnderstoodRequestData(TypedDict):
     source_request_id: str | None
 
 
+class ResolvedRequestData(TypedDict):
+    question: str
+    tool: str
+    entities: list[str]
+    parameters: dict[str, ParameterValue]
+    relation: Relation
+    source_request_id: str | None
+
+
 class ReadyRequest(TypedDict):
     id: str
     status: Literal["ready"]
-    request: UnderstoodRequestData
+    request: ResolvedRequestData
 
 
 class ClarificationRequest(TypedDict):
