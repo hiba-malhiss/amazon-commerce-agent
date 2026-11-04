@@ -1,0 +1,27 @@
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+    )
+
+    llm_model: str = "gpt-4.1-mini"
+    llm_max_output_tokens: int = Field(default=1600, gt=0)
+    llm_timeout_seconds: int = Field(default=30, gt=0)
+    llm_max_retries: int = Field(default=2, ge=0)
+
+    max_history_messages: int = Field(default=8, gt=0)
+    max_history_tokens: int = Field(default=2500, gt=0)
+    max_response_input_tokens: int = Field(default=8000, gt=0)
+    max_understanding_input_tokens: int = Field(default=4000, gt=0)
+    max_recent_requests: int = Field(default=8, gt=0)
+
+    max_requests_per_turn: int = Field(default=5, gt=0)
+    max_parallel_tools: int = Field(default=3, gt=0)
+    max_user_message_length: int = Field(default=4000, gt=0)
+
+
+settings = Settings()

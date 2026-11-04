@@ -2,15 +2,26 @@ import json
 from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages.utils import (
+    count_tokens_approximately,
+    trim_messages,
+)
 
 from app.agent.prompts.generate_response import GENERATE_RESPONSE_PROMPT
 from app.agent.state import AgentState
+from app.core.settings import settings
 from app.llm.client import llm_client
 
 
 async def respond_node(state: AgentState) -> dict[str, Any]:
-    # Get the last 8 conversation messages
-    recent_messages = state["messages"][-8:]
+    # Limit conversation history by messages and tokens
+    recent_messages = trim_messages(
+        state["messages"][-settings.max_history_messages :],
+        max_tokens=settings.max_history_tokens,
+        token_counter="approximate",
+        strategy="last",
+        start_on="human",  # start from human message for context
+    )
 
     # Read current request outcomes
     outcomes = state.get("collected_outcomes", [])
@@ -26,14 +37,19 @@ async def respond_node(state: AgentState) -> dict[str, Any]:
         )
     )
 
+    # Build the complete LLM input
+    messages = [
+        system_message,
+        *recent_messages,
+        outcomes_message,
+    ]
+
+    # Check the total input budget
+    if count_tokens_approximately(messages) > settings.max_response_input_tokens:
+        raise ValueError("Response input exceeds token budget")
+
     # Generate one response
-    response = await llm_client.llm.ainvoke(
-        [
-            system_message,
-            *recent_messages,
-            outcomes_message,
-        ]
-    )
+    response = await llm_client.llm.ainvoke(messages)
 
     if not isinstance(response.content, str):
         raise ValueError("Expected a text response")

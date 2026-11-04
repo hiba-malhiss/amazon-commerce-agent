@@ -14,6 +14,7 @@ from app.conversations.schemas.message import (
     MessageContext,
     MessageResponse,
 )
+from app.core.settings import settings
 
 
 class ConversationService:
@@ -80,7 +81,8 @@ class ConversationService:
         config = {
             "configurable": {
                 "thread_id": str(thread.id),
-            }
+            },
+            "route_after_params_check": settings.max_parallel_tools,
         }
 
         # Execute the current LangGraph workflow

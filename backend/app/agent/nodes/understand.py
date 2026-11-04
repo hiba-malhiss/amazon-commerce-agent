@@ -1,6 +1,7 @@
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages.utils import count_tokens_approximately
 from langgraph.types import Overwrite
 
 from app.agent.prompts.understanding import UNDERSTANDING_PROMPT
@@ -8,6 +9,7 @@ from app.agent.schemas.understanding import UnderstandingResult
 from app.agent.state import AgentState
 from app.configurations.parameters import PARAMETERS
 from app.configurations.tools.registry import TOOLS
+from app.core.settings import settings
 from app.llm.client import llm_client
 
 
@@ -24,8 +26,8 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
         for t in TOOLS
     ]
 
-    # Read previous request summaries and known entities - from the prev message
-    previous_requests = state.get("recent_requests") or []
+    # Load recent requests and known entities
+    recent_requests = state.get("recent_requests", [])[-settings.max_recent_requests :][::-1]
     known_entities = state.get("entities") or {}
 
     # Get only the latest user message
@@ -39,14 +41,20 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
         content=UNDERSTANDING_PROMPT.format(
             parameters=parameters,
             tools=tools,
-            recent_requests=previous_requests[-8:],
+            recent_requests=recent_requests,
             known_entities=list(known_entities.values()),
         )
     )
 
-    # Extract requests without executing or merging parameters
+    messages = [system_message, last_user_message]
+
+    # Check the input token budget
+    if count_tokens_approximately(messages) > settings.max_understanding_input_tokens:
+        raise ValueError("Understanding input exceeds token budget")
+
+    # Extract structured requests
     result = await llm_client.structured_completion(
-        messages=[system_message, last_user_message],
+        messages=messages,
         response_schema=UnderstandingResult,
     )
 
@@ -57,4 +65,5 @@ async def understand_node(state: AgentState) -> dict[str, Any]:
         "requests": [request.model_dump() for request in result.requests],
         "resolved_requests": [],
         "outcomes": Overwrite([]),
+        "collected_outcomes": [],
     }

@@ -24,7 +24,10 @@ async def chat_websocket(websocket: WebSocket) -> None:
                     {
                         "type": "error",
                         "message": "Invalid message format",
-                        "details": exc.errors(include_context=False),
+                        "details": exc.errors(
+                            include_context=False,
+                            include_input=False,
+                        ),  # exclude user message from err
                     }
                 )
                 continue

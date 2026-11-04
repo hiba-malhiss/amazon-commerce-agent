@@ -1,33 +1,34 @@
-from typing import Any
-
-from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-load_dotenv()
+from app.core.settings import settings
 
 
 class LLMClient:
-    def __init__(
-        self,
-        model: str = "gpt-4.1-mini",
-        temperature: float = 0,
-    ):
+    def __init__(self):
         self.llm = ChatOpenAI(
-            model=model,
-            temperature=temperature,
+            model=settings.llm_model,
+            temperature=0,
+            max_tokens=settings.llm_max_output_tokens,
+            timeout=settings.llm_timeout_seconds,
+            max_retries=settings.llm_max_retries,
         )
 
     async def structured_completion(
         self,
         messages: list[BaseMessage],
         response_schema: type[BaseModel],
-    ) -> Any:
-        # Generate and validate structured LLM output
+    ) -> BaseModel:
+        # Generate structured output
         structured_llm = self.llm.with_structured_output(response_schema)
 
-        return await structured_llm.ainvoke(messages)
+        result = await structured_llm.ainvoke(messages)
+
+        if not isinstance(result, response_schema):
+            raise ValueError("Invalid structured LLM response")
+
+        return result
 
 
 llm_client = LLMClient()
