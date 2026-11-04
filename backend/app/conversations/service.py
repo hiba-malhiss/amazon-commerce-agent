@@ -1,3 +1,4 @@
+from collections.abc import Awaitable, Callable
 from typing import Any
 from uuid import UUID
 
@@ -67,6 +68,7 @@ class ConversationService:
         graph: Any,
         message: str,
         thread_id: UUID | None = None,
+        on_trace: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
     ) -> InteractionResponse:
         # Resolve or create conversation
         thread = await self.get_or_create_thread(thread_id)
@@ -82,11 +84,12 @@ class ConversationService:
             "configurable": {
                 "thread_id": str(thread.id),
             },
-            "route_after_params_check": settings.max_parallel_tools,
+            "max_concurrency": settings.max_parallel_tools,
         }
 
-        # Execute the current LangGraph workflow
-        final_state = await graph.ainvoke(
+        # Execute LangGraph. Nodes emit their own trace events with get_stream_writer()
+        final_state = None
+        async for event in graph.astream(
             {
                 "messages": [
                     HumanMessage(
@@ -96,7 +99,21 @@ class ConversationService:
                 ]
             },
             config=config,
-        )
+            stream_mode=["custom", "values"],
+            version="v2",
+            subgraphs=True,  # include events from the tool workflow's nodes
+        ):
+            # Subgraph states arrive too; only the top-level one is the final state
+            if event["type"] == "values" and not event["ns"]:
+                final_state = event["data"]
+
+            elif event["type"] == "custom" and on_trace:
+                # {"node", "status": started | completed | failed, "data": {...}}
+                await on_trace({"interaction_id": str(interaction.id), **event["data"]})
+
+        if final_state is None:
+            raise RuntimeError("No final state received")
+
         last_message = final_state["messages"][-1]
         reply = last_message.content
         assistant_message = await self.messages.create(

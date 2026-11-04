@@ -2,12 +2,6 @@ from app.configurations.schemas import ParameterConfig
 
 PARAMETERS = [
     ParameterConfig(
-        code="query",
-        name="Search Query",
-        type="string",
-        description="Product search query",
-    ),
-    ParameterConfig(
         code="brand",
         name="Brand",
         type="string",
@@ -17,7 +11,11 @@ PARAMETERS = [
         code="category",
         name="Category",
         type="string",
-        description="Product category",
+        description=(
+            "Broad shopping department, only when the user names one or it is obvious. "
+            "Never the product type itself: 'tv' or 'headphones' are not categories "
+            "(a TV is in 'electronics')."
+        ),
     ),
     ParameterConfig(
         code="min_price",

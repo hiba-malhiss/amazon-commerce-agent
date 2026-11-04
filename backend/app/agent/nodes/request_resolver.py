@@ -1,5 +1,8 @@
 from uuid import uuid4
 
+from langgraph.config import get_stream_writer
+
+from app.agent.schemas.execution import ParameterValue
 from app.agent.schemas.resolution import (
     ReadyRequest,
     ResolvedRequest,
@@ -7,10 +10,11 @@ from app.agent.schemas.resolution import (
 )
 from app.agent.state import AgentState, AgentStateUpdate
 from app.core.settings import settings
-from app.execution.schemas import ParameterValue
 
 
 def request_resolver_node(state: AgentState) -> AgentStateUpdate:
+    writer = get_stream_writer()
+    writer({"node": "request_resolver", "status": "started", "data": {}})
 
     # Load previous resolved requests
     history: list[ReadyRequest] = list(state.get("recent_requests", []))
@@ -22,6 +26,13 @@ def request_resolver_node(state: AgentState) -> AgentStateUpdate:
 
     # Check request limit
     if len(requests) > settings.max_requests_per_turn:
+        writer(
+            {
+                "node": "request_resolver",
+                "status": "failed",
+                "data": {"error": "Too many requests", "requests": len(requests)},
+            }
+        )
         return {
             "resolved_requests": [
                 {
@@ -87,6 +98,14 @@ def request_resolver_node(state: AgentState) -> AgentStateUpdate:
         # Save same request for future follow-ups
         history.append(ready_request)
         previous_by_id[request_id] = ready_request
+
+    writer(
+        {
+            "node": "request_resolver",
+            "status": "completed",
+            "data": {"requests": resolved_requests},
+        }
+    )
 
     return {
         "resolved_requests": resolved_requests,

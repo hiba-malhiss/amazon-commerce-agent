@@ -1,5 +1,6 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.messages.utils import count_tokens_approximately
+from langgraph.config import get_stream_writer
 from langgraph.types import Overwrite
 
 from app.agent.prompts.understanding import UNDERSTANDING_PROMPT
@@ -12,6 +13,7 @@ from app.llm.client import llm_client
 
 
 def understanding_failed(reason: str) -> AgentStateUpdate:
+    get_stream_writer()({"node": "understand", "status": "failed", "data": {"error": reason}})
     return {
         "requests": [],
         "resolved_requests": [],
@@ -26,10 +28,14 @@ def understanding_failed(reason: str) -> AgentStateUpdate:
             }
         ],
         "out_of_scope": False,
+        "out_of_scope_reason": None,
     }
 
 
 async def understand_node(state: AgentState) -> AgentStateUpdate:
+    writer = get_stream_writer()
+    writer({"node": "understand", "status": "started", "data": {}})
+
     # Load configurations
     parameters = [p.model_dump() for p in PARAMETERS]
     tools = [{"code": t.code, "name": t.name, "description": t.description} for t in TOOLS]
@@ -72,6 +78,19 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
     if not isinstance(result, UnderstandingResult):
         return understanding_failed("Invalid understanding result")
 
+    writer(
+        {
+            "node": "understand",
+            "status": "completed",
+            "data": {
+                # Pydantic models → plain dicts, so the event can be sent as JSON
+                "requests": [request.model_dump(mode="json") for request in result.requests],
+                "out_of_scope": result.out_of_scope,
+                "out_of_scope_reason": result.out_of_scope_reason,
+            },
+        }
+    )
+
     # Start a new turn: reset everything that belongs to the current message
     return {
         "requests": [request.model_dump() for request in result.requests],
@@ -79,4 +98,5 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
         "outcomes": Overwrite([]),
         "collected_outcomes": [],
         "out_of_scope": result.out_of_scope,
+        "out_of_scope_reason": result.out_of_scope_reason if result.out_of_scope else None,
     }

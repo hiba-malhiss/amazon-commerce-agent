@@ -1,8 +1,13 @@
+from langgraph.config import get_stream_writer
+
 from app.agent.schemas.resolution import RequestOutcome
 from app.agent.state import AgentState, AgentStateUpdate
 
 
 def collect_node(state: AgentState) -> AgentStateUpdate:
+    writer = get_stream_writer()
+    writer({"node": "collect", "status": "started", "data": {}})
+
     outcomes_by_id = {outcome["id"]: outcome for outcome in state.get("outcomes", [])}
     collected: list[RequestOutcome] = []
 
@@ -33,4 +38,11 @@ def collect_node(state: AgentState) -> AgentStateUpdate:
 
         collected.append(outcome)
 
+    writer(
+        {
+            "node": "collect",
+            "status": "completed",
+            "data": {"outcomes": collected},
+        }
+    )
     return {"collected_outcomes": collected}

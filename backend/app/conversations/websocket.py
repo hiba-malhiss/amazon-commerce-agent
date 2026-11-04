@@ -37,10 +37,20 @@ async def chat_websocket(websocket: WebSocket) -> None:
                 service = ConversationService(session)
 
                 try:
+
+                    async def send_trace(event: dict) -> None:
+                        await websocket.send_json(
+                            {
+                                "type": "trace",
+                                "data": event,
+                            }
+                        )
+
                     result = await service.process_message(
                         graph=websocket.app.state.agent_graph,
                         message=body.message,
                         thread_id=body.thread_id,
+                        on_trace=send_trace,
                     )
 
                     await websocket.send_json(

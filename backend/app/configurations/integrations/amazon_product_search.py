@@ -14,7 +14,7 @@ AMAZON_PRODUCT_SEARCH = APIIntegrationConfig(
         "engine": "amazon_search",
     },
     query_params={
-        "q": "query",
+        "q": "product_name",
         "currency": "currency",
         "price_min": "min_price",
         "price_max": "max_price",

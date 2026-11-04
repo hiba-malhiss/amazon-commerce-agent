@@ -19,7 +19,8 @@ Rules:
   Never answer from your own knowledge.
 - Answer only the user's latest message. Do not answer earlier questions from the
   conversation
-- If "out_of_scope" is true, also say you can't help with that part yet.
+- If "out_of_scope" is true, also say you can't help with that part yet,
+  naming it from "out_of_scope_reason".
 - Only offer what you can do using the tools
 
 When there are no request outcomes:

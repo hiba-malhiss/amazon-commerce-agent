@@ -1,6 +1,6 @@
-from typing import Literal, TypedDict
+from typing import Literal, NotRequired, TypedDict
 
-from app.execution.schemas import MappedEntity, ParameterValue
+from app.agent.schemas.execution import MappedEntity, ParameterValue
 
 type Relation = Literal["new", "follow_up", "ambiguous"]
 
@@ -54,3 +54,4 @@ class RequestOutcome(TypedDict):
     result: OutcomeResult | None
     missing_parameters: list[str]
     error: str | None
+    status_code: NotRequired[int | None]  # HTTP status of the API call (set by api_call only)

@@ -5,6 +5,7 @@ from langchain_core.messages import AnyMessage
 from langgraph.graph import MessagesState
 from langgraph.types import Overwrite
 
+from app.agent.schemas.execution import MappedEntity
 from app.agent.schemas.resolution import (
     ReadyRequest,
     RequestOutcome,
@@ -12,7 +13,6 @@ from app.agent.schemas.resolution import (
     ResolvedRequestData,
     UnderstoodRequestData,
 )
-from app.execution.schemas import MappedEntity
 
 
 class AgentState(MessagesState):
@@ -26,6 +26,7 @@ class AgentState(MessagesState):
     outcomes: Annotated[list[RequestOutcome], operator.add]  # one per parallel branch
     collected_outcomes: list[RequestOutcome]  # outcomes in request order
     out_of_scope: bool  # the message asks for something no tool can do
+    out_of_scope_reason: str | None  # what can't be done, from Understanding
 
 
 class AgentStateUpdate(TypedDict, total=False):
@@ -40,9 +41,10 @@ class AgentStateUpdate(TypedDict, total=False):
     outcomes: list[RequestOutcome] | Overwrite
     collected_outcomes: list[RequestOutcome]
     out_of_scope: bool
+    out_of_scope_reason: str | None
 
 
-type ToolStep = Literal["integration", "missing_info", "fail"]
+type ToolStep = Literal["api_call", "missing_info", "fail"]
 
 
 class ToolRequestState(TypedDict):
