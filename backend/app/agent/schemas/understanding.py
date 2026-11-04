@@ -23,3 +23,10 @@ class Request(BaseModel):
 class UnderstandingResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     requests: list[Request]
+    out_of_scope: bool = Field(
+        default=False,
+        description=(
+            "True if the message asks for something no available tool can do "
+            "False for greetings, thanks"
+        )
+    )

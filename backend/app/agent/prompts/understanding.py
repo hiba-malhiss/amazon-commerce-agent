@@ -18,6 +18,7 @@ UNDERSTANDING_PROMPT = """
     - Create one request per distinct task.
     - Use only configured tool/parameter codes and existing references.
     - Return an empty requests list if no available tool applies.
+    - Never force a question into a tool that doesn't do it
     - Never invent values, entities, or request IDs.
 
     Request relationships:
