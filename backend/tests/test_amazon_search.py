@@ -12,7 +12,7 @@ async def test_amazon_product_search():
             "request": {
                 "question": "Samsung headphones",
                 "tool": "search_products",
-                "entities": [],
+                "referenced_entities": [],
                 "parameters": {"query": "Samsung headphones"},
                 "relation": "new",
                 "source_request_id": None,

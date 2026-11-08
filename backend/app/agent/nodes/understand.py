@@ -46,15 +46,17 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
     parameters = [p.model_dump() for p in PARAMETERS]
     tools = [{"code": t.code, "name": t.name, "description": t.description} for t in TOOLS]
 
-    # Load recent requests (newest first) and known entities
-    recent_requests = state.get("recent_requests", [])[-settings.max_recent_requests :][::-1]
-    known_entities = state.get("entities", {})
-
     # Get only the latest user message
     last_user_message = state["messages"][-1]
 
     if not isinstance(last_user_message, HumanMessage):
         return understanding_failed("Invalid user message")
+
+    # Recent requests (newest first)
+    recent_requests = state.get("recent_requests", [])[::-1]
+
+    # Known entities = only the entities the recent requests map to
+    known_entities = list(state.get("entities", {}).values())
 
     # Build Understanding context
     system_message = SystemMessage(
@@ -62,10 +64,9 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
             parameters=parameters,
             tools=tools,
             recent_requests=recent_requests,
-            known_entities=list(known_entities.values()),
+            known_entities=known_entities,
         )
     )
-
     messages = [system_message, last_user_message]
 
     # Check the input token budget

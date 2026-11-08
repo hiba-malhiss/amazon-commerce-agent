@@ -8,10 +8,11 @@ UNDERSTANDING_PROMPT = """
     Available tools:
     {tools}
 
-    Previous requests (newest first):
+    Previous requests (newest first). "result_references" lists what each request found,
+    in result order; "referenced_entities" what the user pointed at:
     {recent_requests}
 
-    Known entities:
+    Known entities (by "reference"):
     {known_entities}
 
     Rules:
@@ -29,6 +30,11 @@ UNDERSTANDING_PROMPT = """
     References:
     - Prefer the latest matching request for implicit follow-ups.
     - Explicit references to older requests take priority.
+    - A position ("the second one", "the first option") counts in the result_references
+      of the newest request, unless the user names another request. Like a product by
+      its name, brand, price or id is matched in the known entities.
+    - Put the references the user points at in referenced_entities, and set
+      source_request_id to the request whose results they came from.
     - If several requests are equally plausible, use ambiguous.
     - If the user answers a pending missing-parameter question,
       link the answer to that request.

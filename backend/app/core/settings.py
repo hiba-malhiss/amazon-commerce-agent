@@ -20,7 +20,10 @@ class Settings(BaseSettings):
     max_history_messages: int = Field(default=8, gt=0)
     max_history_tokens: int = Field(default=2500, gt=0)
     max_response_input_tokens: int = Field(default=8000, gt=0)
-    max_understanding_input_tokens: int = Field(default=4000, gt=0)
+    # Must fit the largest Understanding prompt: ~700 base + max_recent_requests x
+    # max_entities_per_request entities (~85 tokens each) + max_user_message_length / 4.
+    # 8 x 10 entities is ~8,400 tokens. Raise it together with those settings
+    max_understanding_input_tokens: int = Field(default=10000, gt=0)
     max_recent_requests: int = Field(default=8, gt=0)
     max_entities_per_request: int = Field(default=10, gt=0)  # top results kept for follow-ups
 
