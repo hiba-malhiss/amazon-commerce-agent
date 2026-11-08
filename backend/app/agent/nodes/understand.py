@@ -34,7 +34,13 @@ def understanding_failed(reason: str) -> AgentStateUpdate:
 
 async def understand_node(state: AgentState) -> AgentStateUpdate:
     writer = get_stream_writer()
-    writer({"node": "understand", "status": "started", "data": {}})
+    writer(
+        {
+            "node": "understand",
+            "status": "started",
+            "data": {"recent_requests": state.get("recent_requests", [])},
+        }
+    )
 
     # Load configurations
     parameters = [p.model_dump() for p in PARAMETERS]

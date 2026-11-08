@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     max_response_input_tokens: int = Field(default=8000, gt=0)
     max_understanding_input_tokens: int = Field(default=4000, gt=0)
     max_recent_requests: int = Field(default=8, gt=0)
+    max_entities_per_request: int = Field(default=10, gt=0)  # top results kept for follow-ups
 
     max_requests_per_turn: int = Field(default=5, gt=0)
     max_parallel_tools: int = Field(default=3, gt=0)

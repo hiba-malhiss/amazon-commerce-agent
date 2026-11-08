@@ -14,7 +14,7 @@ class Request(BaseModel):
     model_config = ConfigDict(extra="forbid")
     question: str
     tool: str
-    entities: list[str] = Field(
+    referenced_entities: list[str] = Field(
         default_factory=list,
         description=(
             "References of known entities the user points at, e.g. 'product_B0CHR9K2LM'. "

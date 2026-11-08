@@ -1,9 +1,12 @@
 from langgraph.config import get_stream_writer
 
-from app.agent.schemas.resolution import RequestOutcome
+from app.agent.schemas.resolution import ReadyRequest, RequestOutcome
 from app.agent.state import AgentState, AgentStateUpdate
+from app.agent.utils.entities import entities_in_use, extract_found_entities
+from app.core.settings import settings
 
 
+# final state after workflows
 def collect_node(state: AgentState) -> AgentStateUpdate:
     writer = get_stream_writer()
     writer({"node": "collect", "status": "started", "data": {}})
@@ -38,11 +41,35 @@ def collect_node(state: AgentState) -> AgentStateUpdate:
 
         collected.append(outcome)
 
+    # collect entities: save them at the state level and the references on the request,
+    # to avoid duplication
+    found, references_by_request = extract_found_entities(
+        collected, settings.max_entities_per_request
+    )
+
+    # Add this message's requests to the history, complete with their results.
+    new_requests: list[ReadyRequest] = [
+        {**request, "result_references": references_by_request[request["id"]]}
+        if request["id"] in references_by_request
+        else request
+        for request in state["resolved_requests"]
+        if request["status"] == "ready"
+    ]
+    recent_requests = [*state.get("recent_requests", []), *new_requests][
+        -settings.max_recent_requests :
+    ]
+
+    entities = entities_in_use(recent_requests, {**state.get("entities", {}), **found})
+
     writer(
         {
             "node": "collect",
             "status": "completed",
-            "data": {"outcomes": collected},
+            "data": {"outcomes": collected, "entities": entities},
         }
     )
-    return {"collected_outcomes": collected}
+    return {
+        "collected_outcomes": collected,
+        "entities": entities,
+        "recent_requests": recent_requests,
+    }

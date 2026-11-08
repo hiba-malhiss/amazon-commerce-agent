@@ -14,7 +14,7 @@ class ExtractedParameterData(TypedDict):
 class UnderstoodRequestData(TypedDict):
     question: str
     tool: str
-    entities: list[str]
+    referenced_entities: list[str]
     parameters: list[ExtractedParameterData]
     relation: Relation
     source_request_id: str | None
@@ -23,7 +23,7 @@ class UnderstoodRequestData(TypedDict):
 class ResolvedRequestData(TypedDict):
     question: str
     tool: str
-    entities: list[str]
+    referenced_entities: list[str]  # references the user pointed at
     parameters: dict[str, ParameterValue]
     relation: Relation
     source_request_id: str | None
@@ -33,6 +33,7 @@ class ReadyRequest(TypedDict):
     id: str
     status: Literal["ready"]
     request: ResolvedRequestData
+    result_references: NotRequired[list[str]]
 
 
 class ClarificationRequest(TypedDict):

@@ -9,17 +9,19 @@ from app.agent.schemas.resolution import (
     ResolvedRequestData,
 )
 from app.agent.state import AgentState, AgentStateUpdate
+from app.agent.utils.entities import merge_references
 from app.core.settings import settings
 
 
+# validate and merge the follow up requests & add request id
 def request_resolver_node(state: AgentState) -> AgentStateUpdate:
     writer = get_stream_writer()
     writer({"node": "request_resolver", "status": "started", "data": {}})
 
-    # Load previous resolved requests
-    history: list[ReadyRequest] = list(state.get("recent_requests", []))
-
-    previous_by_id: dict[str, ReadyRequest] = {item["id"]: item for item in history}
+    # Previous requests, by id (read only: collect saves the history)
+    previous_by_id: dict[str, ReadyRequest] = {
+        item["id"]: item for item in state.get("recent_requests", [])
+    }
 
     resolved_requests: list[ResolvedRequest] = []
     requests = state.get("requests", [])
@@ -71,17 +73,23 @@ def request_resolver_node(state: AgentState) -> AgentStateUpdate:
 
         # Apply parameter changes
         for param in request["parameters"]:
-            if param["operation"] == "set" and param["value"] is not None:
+            if param["operation"] == "set":
                 parameters[param["code"]] = param["value"]
 
             elif param["operation"] == "remove":
                 parameters.pop(param["code"], None)
 
+        # Inherit previous entity references and add the new ones
+        referenced_entities = merge_references(
+            previous["request"].get("referenced_entities", []) if previous else [],
+            request["referenced_entities"],
+        )
+
         # Build resolved request
         resolved: ResolvedRequestData = {
             "question": request["question"],
             "tool": request["tool"],
-            "entities": request["entities"],
+            "referenced_entities": referenced_entities,
             "parameters": parameters,
             "relation": request["relation"],
             "source_request_id": source_id,
@@ -95,8 +103,7 @@ def request_resolver_node(state: AgentState) -> AgentStateUpdate:
 
         resolved_requests.append(ready_request)
 
-        # Save same request for future follow-ups
-        history.append(ready_request)
+        # A later request in this same message may follow up on this one
         previous_by_id[request_id] = ready_request
 
     writer(
@@ -107,7 +114,4 @@ def request_resolver_node(state: AgentState) -> AgentStateUpdate:
         }
     )
 
-    return {
-        "resolved_requests": resolved_requests,
-        "recent_requests": history[-settings.max_recent_requests :],
-    }
+    return {"resolved_requests": resolved_requests}

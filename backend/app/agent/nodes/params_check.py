@@ -18,7 +18,7 @@ def params_check_node(state: ToolRequestState) -> ToolRequestUpdate:
             {
                 "node": "params_check",
                 "status": "failed",
-                "data": {"request_id": state["id"], "error": error, tool: state["tool"]},
+                "data": {"request_id": state["id"], "error": error, "tool": request["tool"]},
             }
         )
         return {
@@ -44,7 +44,7 @@ def params_check_node(state: ToolRequestState) -> ToolRequestUpdate:
             "data": {
                 "request_id": state["id"],
                 "next_step": next_step,
-                "tool": state["tool"],
+                "tool": request["tool"],
                 "missing_parameters": missing,
             },
         }
