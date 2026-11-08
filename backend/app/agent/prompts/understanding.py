@@ -40,6 +40,8 @@ UNDERSTANDING_PROMPT = """
     - If several requests are equally plausible, use ambiguous.
     - If the user answers a pending missing-parameter question,
       link the answer to that request.
+    - The recent conversation is given for context; extract requests only from the
+      latest user message.
     - Use source_request_id only when referencing an existing request.
     - "Also" creates a new request, optionally referencing the
       previous request to reuse applicable filters.

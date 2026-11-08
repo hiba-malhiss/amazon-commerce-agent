@@ -1,5 +1,5 @@
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.messages.utils import count_tokens_approximately
+from langchain_core.messages.utils import count_tokens_approximately, trim_messages
 from langgraph.config import get_stream_writer
 from langgraph.types import Overwrite
 
@@ -67,7 +67,15 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
             known_entities=known_entities,
         )
     )
-    messages = [system_message, last_user_message]
+
+    history = trim_messages(
+        state["messages"][-settings.max_history_messages :],
+        max_tokens=settings.max_history_tokens,
+        token_counter="approximate",
+        strategy="last",
+        start_on="human",
+    )
+    messages = [system_message, *history]
 
     # Check the input token budget
     if count_tokens_approximately(messages) > settings.max_understanding_input_tokens:
