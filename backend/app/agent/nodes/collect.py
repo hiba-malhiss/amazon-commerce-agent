@@ -43,9 +43,7 @@ def collect_node(state: AgentState) -> AgentStateUpdate:
 
     # collect entities: save them at the state level and the references on the request,
     # to avoid duplication
-    found, references_by_request = extract_found_entities(
-        collected, settings.max_entities_per_request
-    )
+    found, references_by_request = extract_found_entities(collected)
 
     # Add this message's requests to the history, complete with their results.
     new_requests: list[ReadyRequest] = [

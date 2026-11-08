@@ -12,9 +12,8 @@ def merge_references(previous: list[str], new: list[str]) -> list[str]:
 
 def extract_found_entities(
     outcomes: Iterable[RequestOutcome],
-    limit: int,
 ) -> tuple[dict[str, MappedEntity], dict[str, list[str]]]:
-    """What successful requests found (top `limit` each).
+    """What successful requests found.
 
     Returns the entities by reference, and each request's references in result order.
     """
@@ -24,10 +23,10 @@ def extract_found_entities(
     for outcome in outcomes:
         if outcome["status"] != "success" or not outcome["result"]:
             continue
-        top = outcome["result"]["entities"][:limit]
-        for entity in top:
+        results = outcome["result"]["entities"]
+        for entity in results:
             found[entity["reference"]] = entity
-        references_by_request[outcome["id"]] = [entity["reference"] for entity in top]
+        references_by_request[outcome["id"]] = [entity["reference"] for entity in results]
 
     return found, references_by_request
 

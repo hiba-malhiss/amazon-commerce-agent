@@ -23,6 +23,8 @@ UNDERSTANDING_PROMPT = """
     - Never invent values, entities, or request IDs.
     - To act on a known entity, fill the missing parameter values from that entity's
       attributes; never invent an identifier.
+    - If the user names an entity that is not among the known entities, never use a
+      different entity instead: leave its identifier out, so the request asks for it.
 
     Request relationships:
     - new: Independent request with its own parameters.
