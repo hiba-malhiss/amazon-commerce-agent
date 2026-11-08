@@ -74,9 +74,8 @@ async def api_call_node(state: ToolRequestState) -> ToolRequestUpdate:
         if not isinstance(body, dict):
             raise TypeError(f"Expected a JSON object, got {type(body).__name__}")
 
-        # Process the response: only integrations with an entity mapping return entities
-        mapping = integration.entity_mapping
-        entities = map_entities(body, mapping) if mapping is not None else []
+        # Process the response into entities (none when the integration maps none)
+        entities = map_entities(body, integration.entity_mapping)
 
     except (httpx.HTTPError, ValueError, TypeError, KeyError) as exc:
         return failed(state, writer, str(exc), status_code, elapsed_ms(started))
@@ -89,7 +88,7 @@ async def api_call_node(state: ToolRequestState) -> ToolRequestUpdate:
                 "request_id": state["id"],
                 "status_code": status_code,
                 "duration_ms": elapsed_ms(started),
-                "entities": entities if mapping is not None else None,
+                "entities": entities if integration.entity_mapping is not None else None,
             },
         }
     )
@@ -189,10 +188,16 @@ def resolve_auth(
 
 def map_entities(
     response: dict[str, JsonValue],
-    mapping: EntityMappingConfig,
+    mapping: EntityMappingConfig | None,
 ) -> list[MappedEntity]:
+    # Not every integration returns entities: no mapping, nothing to map
+    if mapping is None:
+        return []
+
     entity_config = ENTITIES_BY_CODE[mapping.entity_code]
     items = get_path(response, mapping.collection_path)
+    if isinstance(items, dict):
+        items = [items]  # a details endpoint returns one object, not a list
 
     entities: list[MappedEntity] = []
     for index, item in enumerate(items if isinstance(items, list) else []):

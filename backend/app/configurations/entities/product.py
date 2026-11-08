@@ -9,6 +9,9 @@ PRODUCT = EntityConfig(
         "brand",
         "price",
         "currency",
+        "rating",
+        "review_count",
+        "features",
     ],
     identifier_parameter="product_id",
 )

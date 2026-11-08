@@ -53,4 +53,22 @@ PARAMETERS = [
         type="string",
         description="Currency used for product prices",
     ),
+    ParameterConfig(
+        code="rating",
+        name="Rating",
+        type="number",
+        description="Average customer rating, out of 5",
+    ),
+    ParameterConfig(
+        code="review_count",
+        name="Review Count",
+        type="number",
+        description="Number of customer ratings",
+    ),
+    ParameterConfig(
+        code="features",
+        name="Features",
+        type="list",
+        description="Key feature bullet points of a product",
+    ),
 ]

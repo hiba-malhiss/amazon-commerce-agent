@@ -26,7 +26,7 @@ EntityCode = Annotated[
 class ParameterConfig(BaseModel):
     code: str
     name: str
-    type: Literal["string", "number", "boolean"]
+    type: Literal["string", "number", "boolean", "list"]
     description: str
 
 
@@ -47,7 +47,7 @@ class IntegrationConfig(BaseModel):
 
 class EntityMappingConfig(BaseModel):
     entity_code: EntityCode
-    # Path to the entity list in the API response
+    # Path to the entities in the API response: a list, or one object (a details endpoint)
     collection_path: str
     # Entity parameter code -> API response field path
     field_mapping: dict[ParameterCode, str] = Field(default_factory=dict)

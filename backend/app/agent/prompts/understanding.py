@@ -21,6 +21,8 @@ UNDERSTANDING_PROMPT = """
     - Return an empty requests list if no available tool applies.
     - Never force a question into a tool that doesn't do it
     - Never invent values, entities, or request IDs.
+    - To act on a known entity, fill the missing parameter values from that entity's
+      attributes; never invent an identifier.
 
     Request relationships:
     - new: Independent request with its own parameters.
