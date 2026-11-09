@@ -1,0 +1,29 @@
+.chat-input {
+  padding-bottom: 20px;
+}
+
+.chat-input__box {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+}
+
+.chat-input__box:focus-within {
+  border-color: #ffb84d;
+}
+
+.chat-input__box textarea {
+  padding: 6px 0 !important;
+}
+
+.chat-input__hint {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 12px;
+  color: #a6a6a6;
+}

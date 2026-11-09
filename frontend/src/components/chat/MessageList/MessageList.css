@@ -1,0 +1,18 @@
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.message-list .column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.message-list--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

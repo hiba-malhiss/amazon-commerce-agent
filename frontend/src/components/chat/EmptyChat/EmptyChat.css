@@ -1,0 +1,26 @@
+.empty-chat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-chat__inner {
+  text-align: center;
+}
+
+.empty-chat__icon {
+  font-size: 40px;
+}
+
+.empty-chat__title {
+  margin: 8px 0 4px !important;
+}
+
+.empty-chat__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+}

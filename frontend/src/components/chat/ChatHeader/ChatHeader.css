@@ -1,0 +1,22 @@
+.chat-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.chat-header .column {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 56px;
+  max-width: none;
+}
+
+.chat-header__title {
+  margin: 0 !important;
+}
+
+.chat-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

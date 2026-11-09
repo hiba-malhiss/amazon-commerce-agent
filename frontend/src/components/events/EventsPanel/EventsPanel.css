@@ -1,0 +1,61 @@
+.events {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.events__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 8px 0 14px;
+  border-bottom: 1px solid #f0f0f0;
+  flex: none;
+}
+
+.events__actions {
+  display: flex;
+  gap: 2px;
+}
+
+.events__body {
+  flex: 1;
+  overflow: auto;
+  padding: 10px;
+}
+
+.events__item {
+  background: #fff;
+  border: 1px solid #ececec;
+  border-left: 3px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+.events__item--started {
+  border-left-color: #1677ff;
+}
+
+.events__item--completed {
+  border-left-color: #52c41a;
+}
+
+.events__item--failed {
+  border-left-color: #ff4d4f;
+}
+
+.events__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #595959;
+  margin-bottom: 2px;
+}
+
+/* The JSON viewer (react-json-view-lite): monospace and small, like the rest of the panel */
+.events__item ul, .events__item li {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
