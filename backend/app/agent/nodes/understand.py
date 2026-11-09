@@ -44,7 +44,17 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
 
     # Load configurations
     parameters = [p.model_dump() for p in PARAMETERS]
-    tools = [{"code": t.code, "name": t.name, "description": t.description} for t in TOOLS]
+
+    tools = [
+        {
+            "code": t.code,
+            "name": t.name,
+            "description": t.description,
+            "required_parameters": t.required_parameters,
+            "optional_parameters": t.optional_parameters,
+        }
+        for t in TOOLS
+    ]
 
     # Get only the latest user message
     last_user_message = state["messages"][-1]
