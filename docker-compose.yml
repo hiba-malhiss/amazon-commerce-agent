@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:17
+    # Postgres 17 + the pgvector extension (stores the RAG chunk embeddings)
+    image: pgvector/pgvector:pg17
     container_name: amazon-commerce-postgres
     restart: unless-stopped
     environment:
@@ -13,6 +14,19 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U agent -d amazon_commerce_agent"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Celery broker + result store for background indexing
+  redis:
+    image: redis:7
+    container_name: amazon-commerce-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5

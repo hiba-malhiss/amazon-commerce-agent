@@ -18,6 +18,7 @@ AMAZON_PRODUCT_SEARCH = APIIntegrationConfig(
         "currency": "currency",
         "price_min": "min_price",
         "price_max": "max_price",
+        "page": "page",
     },
     entity_mapping=EntityMappingConfig(
         entity_code="product",

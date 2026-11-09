@@ -54,6 +54,15 @@ PARAMETERS = [
         description="Currency used for product prices",
     ),
     ParameterConfig(
+        code="page",
+        name="Page",
+        type="number",
+        description=(
+            "Results page number, starting at 1. When the user asks for more options, "
+            "set it to the previous request's page + 1"
+        ),
+    ),
+    ParameterConfig(
         code="rating",
         name="Rating",
         type="number",

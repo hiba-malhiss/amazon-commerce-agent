@@ -11,6 +11,7 @@ SEARCH_PRODUCTS = ToolConfig(
         "min_price",
         "max_price",
         "currency",
+        "page",
     ],
     integration_code="amazon_product_search",
 )
