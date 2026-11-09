@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.conversations.models import Thread
@@ -21,3 +22,7 @@ class ThreadRepository:
     async def get_by_id(self, thread_id: UUID) -> Thread | None:
         # Retrieve an existing conversation
         return await self.session.get(Thread, thread_id)
+
+    async def list(self) -> list[Thread]:
+        result = await self.session.execute(select(Thread).order_by(Thread.created_at.desc()))
+        return list(result.scalars().all())

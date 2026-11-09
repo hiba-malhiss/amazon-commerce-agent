@@ -6,6 +6,7 @@ from langchain_core.messages import HumanMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.conversations.models import Interaction, Message, Thread
+from app.conversations.models.thread import TITLE_MAX_LENGTH
 from app.conversations.repositories.interaction import InteractionRepository
 from app.conversations.repositories.message import MessageRepository
 from app.conversations.repositories.thread import ThreadRepository
@@ -72,6 +73,10 @@ class ConversationService:
     ) -> InteractionResponse:
         # Resolve or create conversation
         thread = await self.get_or_create_thread(thread_id)
+
+        # The first message names the thread
+        if thread.title is None:
+            thread.title = thread_title(message)
 
         # Create interaction and persist user message
         interaction, user_message = await self.create_interaction(
@@ -155,6 +160,9 @@ class ConversationService:
             ),
         )
 
+    async def list_threads(self) -> list[Thread]:
+        return await self.threads.list()
+
     async def get_thread_messages(
         self,
         thread_id: UUID,
@@ -166,3 +174,9 @@ class ConversationService:
             raise ValueError(f"Thread '{thread_id}' not found")
 
         return await self.messages.get_by_thread(thread_id)
+
+
+def thread_title(message: str) -> str:
+    """The user's first message as a title: trimmed, spaces collapsed, cut to the column size."""
+    title = " ".join(message.split())
+    return title if len(title) <= TITLE_MAX_LENGTH else title[: TITLE_MAX_LENGTH - 1].rstrip() + "…"

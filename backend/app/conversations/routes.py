@@ -10,8 +10,10 @@ from app.conversations.schemas.message import (
     MessageResponse,
 )
 from app.conversations.schemas.thread import (
+    ThreadListResponse,
     ThreadMessagesResponse,
     ThreadResponse,
+    ThreadSummary,
 )
 from app.conversations.service import ConversationService
 from app.database.session import get_db
@@ -27,6 +29,18 @@ async def create_thread(
     thread = await service.get_or_create_thread()
 
     return ThreadResponse(thread_id=thread.id)
+
+
+@router.get("/threads", response_model=ThreadListResponse)
+async def list_threads(
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> ThreadListResponse:
+    service = ConversationService(session)
+    threads = await service.list_threads()
+
+    return ThreadListResponse(
+        threads=[ThreadSummary(thread_id=thread.id, title=thread.title) for thread in threads]
+    )
 
 
 @router.get(
