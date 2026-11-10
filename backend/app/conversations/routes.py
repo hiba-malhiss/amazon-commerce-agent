@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.conversations.schemas.message import (
@@ -34,12 +34,15 @@ async def create_thread(
 @router.get("/threads", response_model=ThreadListResponse)
 async def list_threads(
     session: Annotated[AsyncSession, Depends(get_db)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> ThreadListResponse:
     service = ConversationService(session)
-    threads = await service.list_threads()
+    threads, has_more = await service.list_threads(limit, offset)
 
     return ThreadListResponse(
-        threads=[ThreadSummary(thread_id=thread.id, title=thread.title) for thread in threads]
+        threads=[ThreadSummary(thread_id=thread.id, title=thread.title) for thread in threads],
+        has_more=has_more,
     )
 
 

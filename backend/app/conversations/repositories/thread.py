@@ -23,6 +23,12 @@ class ThreadRepository:
         # Retrieve an existing conversation
         return await self.session.get(Thread, thread_id)
 
-    async def list(self) -> list[Thread]:
-        result = await self.session.execute(select(Thread).order_by(Thread.created_at.desc()))
+    async def list(self, limit: int, offset: int = 0) -> list[Thread]:
+        query = (
+            select(Thread)
+            .order_by(Thread.created_at.desc(), Thread.id.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.session.execute(query)
         return list(result.scalars().all())

@@ -16,6 +16,7 @@ class ThreadSummary(BaseModel):
 
 class ThreadListResponse(BaseModel):
     threads: list[ThreadSummary] = Field(default_factory=list)
+    has_more: bool = False
 
 
 class ThreadMessagesResponse(BaseModel):

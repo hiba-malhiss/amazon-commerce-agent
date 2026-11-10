@@ -160,8 +160,10 @@ class ConversationService:
             ),
         )
 
-    async def list_threads(self) -> list[Thread]:
-        return await self.threads.list()
+    async def list_threads(self, limit: int, offset: int = 0) -> tuple[list[Thread], bool]:
+        """One page of threads, newest first, and whether more pages exist."""
+        threads = await self.threads.list(limit + 1, offset)
+        return threads[:limit], len(threads) > limit
 
     async def get_thread_messages(
         self,

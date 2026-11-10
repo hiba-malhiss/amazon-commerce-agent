@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 TITLE_MAX_LENGTH = 80
 
+
 class Thread(Base):
     __tablename__ = "threads"
 
