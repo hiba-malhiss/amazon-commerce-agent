@@ -70,6 +70,7 @@ class ConversationService:
         message: str,
         thread_id: UUID | None = None,
         on_trace: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
+        on_prompt: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
     ) -> InteractionResponse:
         # Resolve or create conversation
         thread = await self.get_or_create_thread(thread_id)
@@ -112,9 +113,15 @@ class ConversationService:
             if event["type"] == "values" and not event["ns"]:
                 final_state = event["data"]
 
-            elif event["type"] == "custom" and on_trace:
-                # {"node", "status": started | completed | failed, "data": {...}}
-                await on_trace({"interaction_id": str(interaction.id), **event["data"]})
+            elif event["type"] == "custom":
+                data = {"interaction_id": str(interaction.id), **event["data"]}
+                # Prompt events: {"kind": "prompt", "node", "prompt": <the system prompt>}
+                if data.pop("kind", None) == "prompt":
+                    if on_prompt:
+                        await on_prompt(data)
+                # Trace events: {"node", "status": started | completed | failed, "data": {...}}
+                elif on_trace:
+                    await on_trace(data)
 
         if final_state is None:
             raise RuntimeError("No final state received")

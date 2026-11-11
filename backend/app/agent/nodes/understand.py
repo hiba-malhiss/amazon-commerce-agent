@@ -6,6 +6,7 @@ from langgraph.types import Overwrite
 from app.agent.prompts.understanding import UNDERSTANDING_PROMPT
 from app.agent.schemas.understanding import UnderstandingResult
 from app.agent.state import AgentState, AgentStateUpdate
+from app.agent.utils.prompts import emit_prompt
 from app.configurations.parameters import PARAMETERS
 from app.configurations.tools.registry import TOOLS
 from app.core.settings import settings
@@ -90,6 +91,8 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
     # Check the input token budget
     if count_tokens_approximately(messages) > settings.max_understanding_input_tokens:
         return understanding_failed("Understanding input exceeds token budget")
+
+    emit_prompt("understand", messages)
 
     # Extract structured requests
     try:

@@ -46,11 +46,15 @@ async def chat_websocket(websocket: WebSocket) -> None:
                             }
                         )
 
+                    async def send_prompt(event: dict) -> None:
+                        await websocket.send_json({"type": "prompt", "data": event})
+
                     result = await service.process_message(
                         graph=websocket.app.state.agent_graph,
                         message=body.message,
                         thread_id=body.thread_id,
                         on_trace=send_trace,
+                        on_prompt=send_prompt,
                     )
 
                     await websocket.send_json(

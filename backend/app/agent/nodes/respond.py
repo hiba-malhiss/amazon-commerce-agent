@@ -9,6 +9,7 @@ from langgraph.config import get_stream_writer
 
 from app.agent.prompts.generate_response import GENERATE_RESPONSE_PROMPT
 from app.agent.state import AgentState, AgentStateUpdate
+from app.agent.utils.prompts import emit_prompt
 from app.core.settings import settings
 from app.llm.client import llm_client
 
@@ -67,6 +68,8 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
     # Check the total input budget
     if count_tokens_approximately(messages) > settings.max_response_input_tokens:
         return fallback_response("Response input exceeds token budget")
+
+    emit_prompt("respond", messages)
 
     # Generate one response
     try:
