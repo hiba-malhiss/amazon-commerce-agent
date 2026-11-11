@@ -1,0 +1,16 @@
+.side-panel {
+  height: 100vh;
+}
+
+.side-panel .ant-tabs-nav {
+  margin: 0;
+  padding: 0 8px 0 14px;
+  height: 56px;
+}
+
+.side-panel__body {
+  height: calc(100vh - 56px);
+  overflow: auto;
+  padding: 10px;
+  box-sizing: border-box;
+}

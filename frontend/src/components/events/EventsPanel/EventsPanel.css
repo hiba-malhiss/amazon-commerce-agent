@@ -1,28 +1,8 @@
-.events {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.events__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  padding: 0 8px 0 14px;
-  border-bottom: 1px solid #f0f0f0;
-  flex: none;
-}
-
 .events__actions {
   display: flex;
+  justify-content: flex-end;
   gap: 2px;
-}
-
-.events__body {
-  flex: 1;
-  overflow: auto;
-  padding: 10px;
+  margin-bottom: 6px;
 }
 
 .events__item {

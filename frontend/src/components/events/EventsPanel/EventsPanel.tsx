@@ -1,4 +1,3 @@
-import { CloseOutlined } from "@ant-design/icons";
 import { Button, Typography } from "antd";
 import { useEffect, useRef, useState } from "react";
 import type { TraceEvent } from "../../../api/types";
@@ -8,10 +7,9 @@ import "./EventsPanel.css";
 
 interface Props {
   events: TraceEvent[];
-  onClose: () => void;
 }
 
-export function EventsPanel({ events, onClose }: Props) {
+export function EventsPanel({ events }: Props) {
   const [openDepth, setOpenDepth] = useState(2);
   const [version, setVersion] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -26,21 +24,18 @@ export function EventsPanel({ events, onClose }: Props) {
   };
 
   return (
-    <aside className="events">
-      <header className="events__header">
-        <Typography.Text strong>Events ({events.length})</Typography.Text>
-        <span className="events__actions">
+    <div className="events">
+      {events.length > 0 && (
+        <div className="events__actions">
           <Button size="small" type="text" onClick={() => setAll(Infinity)}>
             Expand all
           </Button>
           <Button size="small" type="text" onClick={() => setAll(0)}>
             Collapse all
           </Button>
-          <Button size="small" type="text" icon={<CloseOutlined />} onClick={onClose} aria-label="Close events" />
-        </span>
-      </header>
-
-      <div className="events__body">
+        </div>
+      )}
+      <div>
         {events.length === 0 ? (
           <Typography.Text type="secondary">Send a message to see the agent's events.</Typography.Text>
         ) : (
@@ -62,6 +57,6 @@ export function EventsPanel({ events, onClose }: Props) {
         )}
         <div ref={bottomRef} />
       </div>
-    </aside>
+    </div>
   );
 }

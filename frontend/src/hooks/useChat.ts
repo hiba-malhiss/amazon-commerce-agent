@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatSocket, type SocketStatus } from "../api/chatSocket";
 import { getThreadMessages } from "../api/threads";
-import type { ChatEvent, MessageResponse, TraceEvent } from "../api/types";
+import type { ChatEvent, MessageResponse, PromptEvent, TraceEvent } from "../api/types";
 
 export interface ChatMessage {
   id: string;
@@ -40,6 +40,7 @@ export function useChat({ threadId, onThreadCreated, onReplied }: Options) {
   const [error, setError] = useState<string | null>(null);
   const [liveTrace, setLiveTrace] = useState<TraceEvent[]>([]);
   const liveTraceRef = useRef<TraceEvent[]>([]);
+  const [livePrompts, setLivePrompts] = useState<PromptEvent[]>([]);
 
   const socketRef = useRef<ChatSocket | null>(null);
   const timeoutRef = useRef<number | undefined>(undefined); // set it after sending a message clear it when an event arrive this is to display error if it takes too long to respond
@@ -55,6 +56,10 @@ export function useChat({ threadId, onThreadCreated, onReplied }: Options) {
     if (event.type === "trace") {
       liveTraceRef.current = [...liveTraceRef.current, event.data];
       setLiveTrace(liveTraceRef.current);
+      return;
+    }
+    if (event.type === "prompt") {
+      setLivePrompts((prev) => [...prev, event.data]);
       return;
     }
     window.clearTimeout(timeoutRef.current);
@@ -152,6 +157,7 @@ export function useChat({ threadId, onThreadCreated, onReplied }: Options) {
       setError(null);
       liveTraceRef.current = [];
       setLiveTrace([]);
+      setLivePrompts([]);
       setMessages((prev) => [
         ...prev,
         { id: `pending-${Date.now()}`, role: "user", text: message, entities: [], pending: true },
@@ -178,6 +184,7 @@ export function useChat({ threadId, onThreadCreated, onReplied }: Options) {
     socketStatus,
     sending,
     liveTrace,
+    livePrompts,
     loadingHistory,
     error,
     clearError: () => setError(null),

@@ -1,7 +1,7 @@
 import { App as AntApp, Layout } from "antd";
 import { useEffect, useState } from "react";
 import { ChatPanel } from "./components/chat/ChatPanel/ChatPanel";
-import { EventsPanel } from "./components/events/EventsPanel/EventsPanel";
+import { SidePanel } from "./components/events/SidePanel/SidePanel";
 import { ThreadSidebar } from "./components/sidebar/ThreadSidebar/ThreadSidebar";
 import { useChat } from "./hooks/useChat";
 import { threadTitle, useThreads } from "./hooks/useThreads";
@@ -70,7 +70,7 @@ export default function App() {
         theme="light"
         className="app__events"
       >
-        <EventsPanel events={chat.liveTrace} onClose={() => setEventsOpen(false)} />
+        <SidePanel events={chat.liveTrace} prompts={chat.livePrompts} onClose={() => setEventsOpen(false)} />
       </Layout.Sider>
     </Layout>
   );

@@ -56,7 +56,14 @@ export interface TraceEvent {
   data: Record<string, unknown>;
 }
 
+export interface PromptEvent {
+  interaction_id: string;
+  node: string; // "understand" or "respond"
+  prompt: string;
+}
+
 export type ChatEvent =
   | { type: "trace"; data: TraceEvent }
+  | { type: "prompt"; data: PromptEvent }
   | { type: "interaction_completed"; data: InteractionResponse }
   | { type: "error"; message: string; details?: unknown };
