@@ -1,7 +1,29 @@
 /* Page shell: full height, the three columns */
-html, body, #root { height: 100%; margin: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1f1f1f; }
-.app { height: 100vh; }
-.app__sider { background: #f7f7f8 !important; border-right: 1px solid #ececec; }
-.app__content { display: flex; min-width: 0; background: #fff; }
-.app__events { background: #fafafa !important; border-left: 1px solid #ececec; }
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1f1f1f;
+}
+
+.app {
+  height: 100vh;
+}
+
+.app__sider {
+  background: #f7f7f8 !important;
+  border-right: 1px solid #ececec;
+}
+
+.app__content {
+  display: flex;
+  min-width: 0;
+  background: #fff;
+}
+
+.app__content .ant-splitter-panel {
+  display: flex;
+}

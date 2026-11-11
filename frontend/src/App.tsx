@@ -1,4 +1,4 @@
-import { App as AntApp, Layout } from "antd";
+import { App as AntApp, Layout, Splitter } from "antd";
 import { useEffect, useState } from "react";
 import { ChatPanel } from "./components/chat/ChatPanel/ChatPanel";
 import { SidePanel } from "./components/events/SidePanel/SidePanel";
@@ -49,29 +49,28 @@ export default function App() {
         />
       </Layout.Sider>
       <Layout.Content className="app__content">
-        <ChatPanel
-          title={title}
-          messages={chat.messages}
-          status={chat.socketStatus}
-          sending={chat.sending}
-          loadingHistory={chat.loadingHistory}
-          error={chat.error}
-          onCloseError={chat.clearError}
-          onSend={chat.send}
-          eventsOpen={eventsOpen}
-          onToggleEvents={() => setEventsOpen((open) => !open)}
-        />
+        <Splitter>
+          <Splitter.Panel min={360}>
+            <ChatPanel
+              title={title}
+              messages={chat.messages}
+              status={chat.socketStatus}
+              sending={chat.sending}
+              loadingHistory={chat.loadingHistory}
+              error={chat.error}
+              onCloseError={chat.clearError}
+              onSend={chat.send}
+              eventsOpen={eventsOpen}
+              onToggleEvents={() => setEventsOpen((open) => !open)}
+            />
+          </Splitter.Panel>
+          {eventsOpen && (
+            <Splitter.Panel defaultSize={420} min={320} max="75%">
+              <SidePanel events={chat.liveTrace} prompts={chat.livePrompts} onClose={() => setEventsOpen(false)} />
+            </Splitter.Panel>
+          )}
+        </Splitter>
       </Layout.Content>
-      <Layout.Sider
-        width={420}
-        collapsedWidth={0}
-        collapsed={!eventsOpen}
-        trigger={null}
-        theme="light"
-        className="app__events"
-      >
-        <SidePanel events={chat.liveTrace} prompts={chat.livePrompts} onClose={() => setEventsOpen(false)} />
-      </Layout.Sider>
     </Layout>
   );
 }
