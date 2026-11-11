@@ -1,8 +1,8 @@
 from langgraph.config import get_stream_writer
 
-from app.agent.schemas.resolution import ReadyRequest, RequestOutcome
+from app.agent.schemas.resolution import ReadyRequest, RequestOutcome, VisibleEntityList
 from app.agent.state import AgentState, AgentStateUpdate
-from app.agent.utils.entities import entities_in_use, extract_found_entities
+from app.agent.utils.entities import entities_in_use, numbered_cards
 from app.core.settings import settings
 
 
@@ -41,33 +41,47 @@ def collect_node(state: AgentState) -> AgentStateUpdate:
 
         collected.append(outcome)
 
-    # collect entities: save them at the state level and the references on the request,
-    # to avoid duplication
-    found, references_by_request = extract_found_entities(collected)
-
-    # Add this message's requests to the history, complete with their results.
+    # Add this message's requests to the history
     new_requests: list[ReadyRequest] = [
-        {**request, "result_references": references_by_request[request["id"]]}
-        if request["id"] in references_by_request
-        else request
-        for request in state["resolved_requests"]
-        if request["status"] == "ready"
+        request for request in state["resolved_requests"] if request["status"] == "ready"
     ]
     recent_requests = [*state.get("recent_requests", []), *new_requests][
         -settings.max_recent_requests :
     ]
 
-    entities = entities_in_use(recent_requests, {**state.get("entities", {}), **found})
+    # This turn's cards join the lists the user can point at.
+    # A single result (e.g. one product's details) is not a list to pick from.
+    visible_entities = state.get("visible_entities", [])
+    cards = numbered_cards(collected)
+    if len(cards) >= 2:
+        card_list: VisibleEntityList = {
+            "items": [
+                {"reference": card["entity"]["reference"], "request_id": card["request_id"]}
+                for card in cards
+            ]
+        }
+        visible_entities = [*visible_entities, card_list][-settings.max_visible_entity_lists :]
+
+    # Add this turn's card entities (fresh data replaces stored), then drop what's unused
+    found = {card["entity"]["reference"]: card["entity"] for card in cards}
+    entities = entities_in_use(
+        recent_requests, visible_entities, {**state.get("entities", {}), **found}
+    )
 
     writer(
         {
             "node": "collect",
             "status": "completed",
-            "data": {"outcomes": collected, "entities": entities},
+            "data": {
+                "outcomes": collected,
+                "entities": entities,
+                "visible_entities": visible_entities,
+            },
         }
     )
     return {
         "collected_outcomes": collected,
         "entities": entities,
         "recent_requests": recent_requests,
+        "visible_entities": visible_entities,
     }

@@ -10,10 +10,9 @@ async def main():
     # Simulate the current AgentState
     state = {
         "messages": [HumanMessage(content="Find Samsung headphones under $100")],
-        "parameters": {},
+        "recent_requests": [],
+        "visible_entities": [],
         "entities": {},
-        "requests": [],
-        "tool_results": {},
     }
 
     # Run Understanding

@@ -19,16 +19,18 @@ class Settings(BaseSettings):
 
     max_history_messages: int = Field(default=8, gt=0)
     max_history_tokens: int = Field(default=2500, gt=0)
-    # Must fit the largest reply prompt: up to max_requests_per_turn searches in one message
-    # (~1,400 tokens each: ~20 results x ~65) + history (max_history_tokens) + ~600 prompt
-    # = ~10,000 tokens
+    # Must fit the largest reply prompt: ~600 prompt + the cards (max_cards_per_reply results,
+    # ~100 tokens each with their details) + history (max_history_tokens): ~4,500 tokens
     max_response_input_tokens: int = Field(default=12000, gt=0)
-    # Must fit the largest Understanding prompt: ~700 base + every entity of the last
-    # max_recent_requests requests (all results are kept: ~1,400 tokens per search) + the
-    # conversation history (max_history_tokens, which includes the latest message).
-    # 8 searches + 2,500 history is ~14,400 tokens. Raise it together with those settings
+    # Must fit the largest Understanding prompt: ~1,000 base + recent requests + the visible
+    # results (max_visible_entity_lists x max_cards_per_reply briefs, ~60 tokens each) +
+    # history (max_history_tokens): ~6,000 tokens
     max_understanding_input_tokens: int = Field(default=16000, gt=0)
     max_recent_requests: int = Field(default=8, gt=0)
+    # Lists of items the user was shown, kept for "the second one" and "the Sony one"
+    max_visible_entity_lists: int = Field(default=3, gt=0)
+    # Results shown as numbered cards under one reply; the rest aren't shown or sent to it
+    max_cards_per_reply: int = Field(default=10, gt=0)
 
     max_requests_per_turn: int = Field(default=5, gt=0)
     max_parallel_tools: int = Field(default=3, gt=0)

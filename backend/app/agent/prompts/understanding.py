@@ -22,13 +22,12 @@ REQUEST RELATIONSHIPS
 - Use source_request_id only for a known request.
 
 ENTITY REFERENCES
-- Resolve named entities using their identifying attributes.
-- Positional references ("first", "second", "last") refer to
-  result_references in the relevant request, in displayed order.
-- Use only existing entity references.
-- Extract required parameter values from the referenced entity.
-- Never substitute another entity when a reference is uncertain.
-- Ask for clarification through the structured result when needed.
+- When the user points at results they were shown, put their references from VISIBLE
+  RESULTS in referenced_entities and set source_request_id to the request that returned
+  them. They may point by number ("#2", "the second TV" = number 2 of the TV results,
+  "the last one") or by description ("the Sony one", "the cheaper JBL").
+- reference_quote: the user's words that point at them, copied exactly from the message.
+- If no visible result fits, leave referenced_entities empty.
 
 SCOPE
 - If no available tool supports the task, return no requests.
@@ -49,6 +48,6 @@ AVAILABLE TOOLS
 RECENT REQUESTS
 {recent_requests}
 
-KNOWN ENTITIES
-{known_entities}
+VISIBLE RESULTS (one list per reply, newest first; numbers as shown on the cards)
+{visible_results}
 """

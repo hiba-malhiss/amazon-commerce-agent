@@ -1,7 +1,19 @@
 from collections.abc import Iterable
 
+from pydantic import JsonValue
+
 from app.agent.schemas.execution import MappedEntity
-from app.agent.schemas.resolution import ReadyRequest, RequestOutcome
+from app.agent.schemas.resolution import (
+    NumberedCard,
+    ReadyRequest,
+    RequestOutcome,
+    VisibleEntityList,
+)
+from app.configurations.entities.registry import ENTITIES_BY_CODE
+from app.core.settings import settings
+
+# Long text (e.g. a product's title) is cut to this in a brief
+MAX_BRIEF_TEXT = 80
 
 
 def merge_references(previous: list[str], new: list[str]) -> list[str]:
@@ -10,41 +22,87 @@ def merge_references(previous: list[str], new: list[str]) -> list[str]:
     return list(dict.fromkeys([*previous, *new]))
 
 
-def extract_found_entities(
-    outcomes: Iterable[RequestOutcome],
-) -> tuple[dict[str, MappedEntity], dict[str, list[str]]]:
-    """What successful requests found.
+def entities_in_use(
+    requests: Iterable[ReadyRequest],
+    visible_entities: Iterable[VisibleEntityList],
+    stored: dict[str, MappedEntity],
+) -> dict[str, MappedEntity]:
+    """The stored entities still needed: what requests referred to and what the kept
+    card lists show. Order kept, each once."""
+    referenced = [
+        reference
+        for request in requests
+        for reference in request["request"].get("referenced_entities", [])
+    ]
+    shown = [card["reference"] for card_list in visible_entities for card in card_list["items"]]
+    return {
+        reference: stored[reference]
+        for reference in dict.fromkeys([*referenced, *shown])
+        if reference in stored
+    }
 
-    Returns the entities by reference, and each request's references in result order.
+
+def entity_label(entity: MappedEntity) -> str:
+    """How the user knows the entity: its config's label attribute, else its reference."""
+    config = ENTITIES_BY_CODE.get(entity["entity_code"])
+    value = (
+        entity["attributes"].get(config.label_parameter)
+        if config and config.label_parameter
+        else None
+    )
+    return str(value).strip() if value not in (None, "") else entity["reference"]
+
+
+def numbered_cards(outcomes: Iterable[RequestOutcome]) -> list[NumberedCard]:
+    """This turn's results as the user sees them: one numbered row of cards.
+
+    Successful requests in order, each one's results in the API's order, each entity once,
+    up to max_cards_per_reply. collect saves them, respond answers by their numbers, and
+    the service stores them for the UI.
     """
-    found: dict[str, MappedEntity] = {}
-    references_by_request: dict[str, list[str]] = {}
-
+    cards: dict[str, NumberedCard] = {}  # by reference, so each entity gets one card
     for outcome in outcomes:
         if outcome["status"] != "success" or not outcome["result"]:
             continue
-        results = outcome["result"]["entities"]
-        for entity in results:
-            found[entity["reference"]] = entity
-        references_by_request[outcome["id"]] = [entity["reference"] for entity in results]
+        for entity in outcome["result"]["entities"]:
+            if len(cards) == settings.max_cards_per_reply:
+                return list(cards.values())
+            cards.setdefault(
+                entity["reference"],
+                {"number": len(cards) + 1, "request_id": outcome["id"], "entity": entity},
+            )
+    return list(cards.values())
 
-    return found, references_by_request
 
-
-def entities_in_use(
-    requests: Iterable[ReadyRequest],
-    stored: dict[str, MappedEntity],
-) -> dict[str, MappedEntity]:
-    """Stored entities the requests point at: what the user referred to and what each found.
-
-    Keeps the requests' order and each reference once; unknown references are skipped.
-    """
-    references = dict.fromkeys(
-        reference
-        for request in requests
-        for reference in [
-            *request["request"].get("referenced_entities", []),
-            *request.get("result_references", []),
+def visible_briefs(
+    visible_entities: Iterable[VisibleEntityList], entities: dict[str, MappedEntity]
+) -> list[list[dict[str, JsonValue]]]:
+    """The cards the user can still point at, as Understanding sees them: one list per
+    reply (newest first), each card with its reference, number, request and the entity's
+    brief_parameters."""
+    return [
+        [
+            {
+                "reference": card["reference"],
+                "number": number,
+                "request_id": card["request_id"],
+                **entity_brief(entities[card["reference"]]),
+            }
+            for number, card in enumerate(card_list["items"], start=1)
+            if card["reference"] in entities
         ]
+        for card_list in reversed(list(visible_entities))
+    ]
+
+
+def entity_brief(entity: MappedEntity) -> dict[str, JsonValue]:
+    """The entity's brief_parameters (from its config), long text cut short."""
+    config = ENTITIES_BY_CODE.get(entity["entity_code"])
+    brief = (
+        {code: entity["attributes"].get(code) for code in config.brief_parameters} if config else {}
     )
-    return {reference: stored[reference] for reference in references if reference in stored}
+    return {
+        code: value[:MAX_BRIEF_TEXT] if isinstance(value, str) else value
+        for code, value in brief.items()
+        if value is not None
+    }

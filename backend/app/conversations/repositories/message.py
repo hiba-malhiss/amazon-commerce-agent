@@ -16,7 +16,7 @@ class MessageRepository:
         interaction_id: UUID,
         role: str,
         content: str,
-        entities: list[str] | None = None,
+        entities: list[dict] | None = None,
     ) -> Message:
         # Save message under its thread and interaction
         message = Message(

@@ -70,6 +70,12 @@ def validate_config() -> None:
         ):
             raise ValueError(f"Entity '{entity.code}' has an invalid identifier parameter")
 
+        if entity.label_parameter is not None and entity.label_parameter not in entity.parameters:
+            raise ValueError(f"Entity '{entity.code}' has an invalid label parameter")
+
+        if not set(entity.brief_parameters) <= set(entity.parameters):
+            raise ValueError(f"Entity '{entity.code}' has invalid brief parameters")
+
     # Validate integration configurations
     for integration in INTEGRATIONS:
         if not isinstance(integration, APIIntegrationConfig):

@@ -14,7 +14,8 @@ class ExtractedParameterData(TypedDict):
 class UnderstoodRequestData(TypedDict):
     question: str
     tool: str
-    referenced_entities: list[str]
+    referenced_entities: list[str]  # visible results the user points at
+    reference_quote: str | None  # the user's words that point at them
     parameters: list[ExtractedParameterData]
     relation: Relation
     source_request_id: str | None
@@ -23,7 +24,7 @@ class UnderstoodRequestData(TypedDict):
 class ResolvedRequestData(TypedDict):
     question: str
     tool: str
-    referenced_entities: list[str]  # references the user pointed at
+    referenced_entities: list[str]  # the entities the user pointed at
     parameters: dict[str, ParameterValue]
     relation: Relation
     source_request_id: str | None
@@ -33,7 +34,6 @@ class ReadyRequest(TypedDict):
     id: str
     status: Literal["ready"]
     request: ResolvedRequestData
-    result_references: NotRequired[list[str]]
 
 
 class ClarificationRequest(TypedDict):
@@ -43,6 +43,25 @@ class ClarificationRequest(TypedDict):
 
 
 type ResolvedRequest = ReadyRequest | ClarificationRequest
+
+
+class VisibleEntity(TypedDict):
+    reference: str
+    request_id: str  # the request whose result it is
+
+
+class VisibleEntityList(TypedDict):
+    """The cards one reply showed the user, card 1 first."""
+
+    items: list[VisibleEntity]
+
+
+class NumberedCard(TypedDict):
+    """One result shown to the user as a numbered card this turn."""
+
+    number: int
+    request_id: str
+    entity: MappedEntity
 
 
 class OutcomeResult(TypedDict):

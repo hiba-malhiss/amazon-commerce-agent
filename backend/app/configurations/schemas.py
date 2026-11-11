@@ -97,3 +97,6 @@ class EntityConfig(BaseModel):
     name: str
     parameters: list[ParameterCode] = Field(default_factory=list)
     identifier_parameter: ParameterCode | None = None
+    label_parameter: ParameterCode | None = None
+    # What Understanding sees of an entity the user was shown, to tell which one they mean
+    brief_parameters: list[ParameterCode] = Field(default_factory=list)

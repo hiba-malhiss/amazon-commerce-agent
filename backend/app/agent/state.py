@@ -12,6 +12,7 @@ from app.agent.schemas.resolution import (
     ResolvedRequest,
     ResolvedRequestData,
     UnderstoodRequestData,
+    VisibleEntityList,
 )
 
 
@@ -19,6 +20,7 @@ class AgentState(MessagesState):
     # Persistent across messages
     entities: dict[str, MappedEntity]  # previously retrieved products, by reference
     recent_requests: list[ReadyRequest]  # resolved requests, for follow-ups
+    visible_entities: list[VisibleEntityList]  # what the latest replies showed, in the order shown
 
     # Current message only (reset by `understand`)
     requests: list[UnderstoodRequestData]  # raw requests from Understanding
@@ -35,6 +37,7 @@ class AgentStateUpdate(TypedDict, total=False):
     messages: list[AnyMessage]
     entities: dict[str, MappedEntity]
     recent_requests: list[ReadyRequest]
+    visible_entities: list[VisibleEntityList]
     requests: list[UnderstoodRequestData]
     resolved_requests: list[ResolvedRequest]
     # list → appended (operator.add); Overwrite → replaced, used to reset each message

@@ -5,6 +5,7 @@ from uuid import UUID
 from langchain_core.messages import HumanMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agent.utils.entities import entity_label, numbered_cards
 from app.conversations.models import Interaction, Message, Thread
 from app.conversations.models.thread import TITLE_MAX_LENGTH
 from app.conversations.repositories.interaction import InteractionRepository
@@ -128,11 +129,24 @@ class ConversationService:
 
         last_message = final_state["messages"][-1]
         reply = last_message.content
+
+        # The results shown under the reply, numbered as the agent numbered them
+        cards = [
+            {
+                "number": card["number"],
+                "reference": card["entity"]["reference"],
+                "entity_code": card["entity"]["entity_code"],
+                "label": entity_label(card["entity"]),
+                "attributes": card["entity"]["attributes"],
+            }
+            for card in numbered_cards(final_state.get("collected_outcomes", []))
+        ]
         assistant_message = await self.messages.create(
             thread_id=thread.id,
             interaction_id=interaction.id,
             role="assistant",
             content=reply,
+            entities=cards,
         )
 
         await self.session.commit()

@@ -4,8 +4,9 @@ from langgraph.config import get_stream_writer
 from langgraph.types import Overwrite
 
 from app.agent.prompts.understanding import UNDERSTANDING_PROMPT
-from app.agent.schemas.understanding import UnderstandingResult
+from app.agent.schemas.understanding import UnderstandingResult, understanding_schema
 from app.agent.state import AgentState, AgentStateUpdate
+from app.agent.utils.entities import visible_briefs
 from app.agent.utils.prompts import emit_prompt
 from app.configurations.parameters import PARAMETERS
 from app.configurations.tools.registry import TOOLS
@@ -64,10 +65,19 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
         return understanding_failed("Invalid user message")
 
     # Recent requests (newest first)
-    recent_requests = state.get("recent_requests", [])[::-1]
+    recent_requests = [
+        {
+            "id": item["id"],
+            "question": item["request"]["question"],
+            "tool": item["request"]["tool"],
+            "parameters": item["request"]["parameters"],
+        }
+        for item in state.get("recent_requests", [])[::-1]
+    ]
 
-    # Known entities = only the entities the recent requests map to
-    known_entities = list(state.get("entities", {}).values())
+    # The results the user can point at: a brief of each, never the full entity
+    visible_results = visible_briefs(state.get("visible_entities", []), state.get("entities", {}))
+    references = [card["reference"] for card_list in visible_results for card in card_list]
 
     # Build Understanding context
     system_message = SystemMessage(
@@ -75,7 +85,7 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
             parameters=parameters,
             tools=tools,
             recent_requests=recent_requests,
-            known_entities=known_entities,
+            visible_results=visible_results,
         )
     )
 
@@ -98,7 +108,7 @@ async def understand_node(state: AgentState) -> AgentStateUpdate:
     try:
         result = await llm_client.structured_completion(
             messages=messages,
-            response_schema=UnderstandingResult,
+            response_schema=understanding_schema(references),
         )
     except Exception:
         return understanding_failed("Unable to process the request")

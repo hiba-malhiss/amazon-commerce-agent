@@ -45,8 +45,9 @@ class Message(Base):
         index=True,
     )
 
-    # extract from trace these are the id's
-    entities: Mapped[list[str]] = mapped_column(
+    # Assistant replies: a snapshot of the results shown as cards (see schemas.message.Card),
+    # kept here so a reloaded thread still shows them after the agent state drops them
+    entities: Mapped[list[dict]] = mapped_column(
         JSONB,
         default=list,
         nullable=False,

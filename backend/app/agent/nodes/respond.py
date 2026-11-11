@@ -9,6 +9,7 @@ from langgraph.config import get_stream_writer
 
 from app.agent.prompts.generate_response import GENERATE_RESPONSE_PROMPT
 from app.agent.state import AgentState, AgentStateUpdate
+from app.agent.utils.entities import numbered_cards
 from app.agent.utils.prompts import emit_prompt
 from app.core.settings import settings
 from app.llm.client import llm_client
@@ -36,8 +37,15 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
         start_on="human",  # start from human message for context
     )
 
-    # Read current request outcomes
-    outcomes = state.get("collected_outcomes", [])
+    # The outcomes without their results, and the results the user sees as numbered cards
+    collected = state.get("collected_outcomes", [])
+    outcomes = [
+        {key: value for key, value in outcome.items() if key != "result"} for outcome in collected
+    ]
+    cards = [
+        {"card": card["number"], "request_id": card["request_id"], **card["entity"]}
+        for card in numbered_cards(collected)
+    ]
 
     # Build system instructions
     system_message = SystemMessage(content=GENERATE_RESPONSE_PROMPT)
@@ -49,6 +57,7 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
             + json.dumps(
                 {
                     "outcomes": outcomes,
+                    "cards": cards,
                     "out_of_scope": state.get("out_of_scope", False),
                     "out_of_scope_reason": state.get("out_of_scope_reason"),
                 },

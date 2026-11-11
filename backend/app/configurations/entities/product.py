@@ -14,4 +14,6 @@ PRODUCT = EntityConfig(
         "features",
     ],
     identifier_parameter="product_id",
+    label_parameter="product_name",
+    brief_parameters=["product_name", "brand", "price", "rating"],
 )
