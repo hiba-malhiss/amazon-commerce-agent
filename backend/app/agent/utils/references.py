@@ -10,11 +10,9 @@ def check_references(
     request: UnderstoodRequestData, label_by_reference: dict[str, str], message: str
 ) -> str | None:
     """A question to ask when the results the user pointed at can't be trusted, else None.
-
-    - every reference must be a visible result
-    - the quote's words must be in the user's message (the model can't invent a reference)
-    - code also reads the names in the quote: "the JBL one" with two JBL cards is asked
-      about even when the model picked one
+    1. Every reference is a visible product. If not → ask.
+    2. The quote's words are in the user's message. If not → ask.
+    3. The names in the quote fit 2+ products (and the user said nothing else to tell them apart) → ask.
     """
     references = request["referenced_entities"]
     if not references:
