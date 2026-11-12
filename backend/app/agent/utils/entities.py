@@ -53,12 +53,16 @@ def entity_label(entity: MappedEntity) -> str:
     return str(value).strip() if value not in (None, "") else entity["reference"]
 
 
-def numbered_cards(outcomes: Iterable[RequestOutcome]) -> list[NumberedCard]:
+def numbered_cards(
+    outcomes: Iterable[RequestOutcome], visible_entities: Iterable[VisibleEntityList]
+) -> list[NumberedCard]:
     """This turn's results as the user sees them: one numbered row of cards.
 
     Successful requests in order, each one's results in the API's order, each entity once,
-    up to max_cards_per_reply. collect saves them, respond answers by their numbers, and
-    the service stores them for the UI.
+    up to max_cards_per_reply. When every card is already on screen (e.g. one product's
+    details, a comparison), each keeps the number it has there, so "the fifth one" keeps
+    meaning the same product. collect saves them, respond answers by them, and the
+    service stores them for the UI.
     """
     cards: dict[str, NumberedCard] = {}  # by reference, so each entity gets one card
     for outcome in outcomes:
@@ -66,11 +70,20 @@ def numbered_cards(outcomes: Iterable[RequestOutcome]) -> list[NumberedCard]:
             continue
         for entity in outcome["result"]["entities"]:
             if len(cards) == settings.max_cards_per_reply:
-                return list(cards.values())
+                break
             cards.setdefault(
                 entity["reference"],
                 {"number": len(cards) + 1, "request_id": outcome["id"], "entity": entity},
             )
+
+    # Each visible product's number in the newest list that shows it
+    visible_number = {
+        card["reference"]: number
+        for card_list in visible_entities
+        for number, card in enumerate(card_list["items"], start=1)
+    }
+    if cards and all(reference in visible_number for reference in cards):
+        return [{**card, "number": visible_number[ref]} for ref, card in cards.items()]
     return list(cards.values())
 
 

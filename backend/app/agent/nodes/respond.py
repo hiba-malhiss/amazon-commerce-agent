@@ -44,7 +44,7 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
     ]
     cards = [
         {"card": card["number"], "request_id": card["request_id"], **card["entity"]}
-        for card in numbered_cards(collected)
+        for card in numbered_cards(collected, state.get("visible_entities", []))
     ]
 
     # Build system instructions

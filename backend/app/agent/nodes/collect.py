@@ -49,11 +49,12 @@ def collect_node(state: AgentState) -> AgentStateUpdate:
         -settings.max_recent_requests :
     ]
 
-    # This turn's cards join the lists the user can point at.
-    # A single result (e.g. one product's details) is not a list to pick from.
+    # This turn's cards join the lists the user can point at, unless they're all already on
+    # screen (details, a comparison) or a single result: those aren't a new list to pick from
     visible_entities = state.get("visible_entities", [])
-    cards = numbered_cards(collected)
-    if len(cards) >= 2:
+    visible = {card["reference"] for card_list in visible_entities for card in card_list["items"]}
+    cards = numbered_cards(collected, visible_entities)
+    if len(cards) >= 2 and any(card["entity"]["reference"] not in visible for card in cards):
         card_list: VisibleEntityList = {
             "items": [
                 {"reference": card["entity"]["reference"], "request_id": card["request_id"]}

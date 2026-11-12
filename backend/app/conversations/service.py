@@ -139,7 +139,9 @@ class ConversationService:
                 "label": entity_label(card["entity"]),
                 "attributes": card["entity"]["attributes"],
             }
-            for card in numbered_cards(final_state.get("collected_outcomes", []))
+            for card in numbered_cards(
+                final_state.get("collected_outcomes", []), final_state.get("visible_entities", [])
+            )
         ]
         assistant_message = await self.messages.create(
             thread_id=thread.id,

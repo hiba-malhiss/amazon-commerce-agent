@@ -48,6 +48,6 @@ AVAILABLE TOOLS
 RECENT REQUESTS
 {recent_requests}
 
-VISIBLE RESULTS (one list per reply, newest first; numbers as shown on the cards)
+VISIBLE RESULTS (one list per reply, newest first; number = place in the row, 1 = first)
 {visible_results}
 """

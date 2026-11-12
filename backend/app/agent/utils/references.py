@@ -11,13 +11,18 @@ def check_references(
 ) -> str | None:
     """A question to ask when the results the user pointed at can't be trusted, else None.
 
-    - the quote must be in the user's message (the model can't invent a reference)
+    - every reference must be a visible result
+    - the quote's words must be in the user's message (the model can't invent a reference)
     - code also reads the names in the quote: "the JBL one" with two JBL cards is asked
       about even when the model picked one
     """
     references = request["referenced_entities"]
     if not references:
         return None
+
+    # Only results the user can see (with none visible, the schema can't enforce this)
+    if any(reference not in label_by_reference for reference in references):
+        return "Which item do you mean?" if label_by_reference else "There are no results yet."
 
     quote = request["reference_quote"] or ""
     if not quote_in_message(quote, message):
@@ -43,7 +48,10 @@ def named_cards(quote: str, label_by_reference: dict[str, str]) -> tuple[list[st
 
 
 def quote_in_message(quote: str, message: str) -> bool:
-    return len(fold(quote)) >= 2 and fold(quote) in fold(message)
+    """Every word of the quote is in the message ("the first one" fits "the first and the
+    fifth one"): the model can rephrase the user's words, not add its own."""
+    quote_words = words(quote)
+    return bool(quote_words) and quote_words <= words(message)
 
 
 def words(text: str) -> set[str]:
