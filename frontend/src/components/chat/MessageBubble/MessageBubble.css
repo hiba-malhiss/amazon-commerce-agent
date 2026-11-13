@@ -20,8 +20,20 @@
   background: #232f3e;
 }
 
-.bubble {
+.msg__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
   max-width: 78%;
+}
+
+.msg--user .msg__body {
+  align-items: flex-end;
+}
+
+.bubble {
+  align-self: flex-start;
   padding: 10px 14px;
   border-radius: 16px;
   line-height: 1.55;
@@ -33,6 +45,7 @@
 }
 
 .msg--user .bubble {
+  align-self: flex-end;
   background: #fff4e0;
   border-top-right-radius: 4px;
 }

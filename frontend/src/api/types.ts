@@ -7,9 +7,18 @@ export interface MessageContext {
   role: Role;
 }
 
+// One result shown under an assistant reply; "the second one" means number 2
+export interface Card {
+  number: number;
+  reference: string;
+  entity_code: string; // e.g. "product"
+  label: string; // its name
+  attributes: Record<string, unknown>;
+}
+
 export interface MessageBody {
   text: string;
-  entities: string[];
+  entities: Card[]; // the reply's cards, number 1 first
 }
 
 export interface MessageResponse {

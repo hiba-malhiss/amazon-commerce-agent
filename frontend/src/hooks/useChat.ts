@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatSocket, type SocketStatus } from "../api/chatSocket";
 import { getThreadMessages } from "../api/threads";
-import type { ChatEvent, MessageResponse, PromptEvent, TraceEvent } from "../api/types";
+import type { Card, ChatEvent, MessageResponse, PromptEvent, TraceEvent } from "../api/types";
 
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant" | "note";
   text: string;
-  entities: string[];
+  entities: Card[];
   pending?: boolean;
   failed?: boolean;
 }
