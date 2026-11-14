@@ -92,6 +92,13 @@ class APIIntegrationConfig(IntegrationConfig):
     authentication: AuthenticationConfig = Field(default_factory=AuthenticationConfig)
 
 
+class RAGIntegrationConfig(IntegrationConfig):
+    type: Literal["rag"] = "rag"
+    knowledge_base_code: str
+    top_k: int = Field(default=5, gt=0)
+    relevance_threshold: float | None = None
+
+
 class EntityConfig(BaseModel):
     code: str
     name: str

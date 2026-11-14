@@ -1,8 +1,9 @@
 from app.configurations.entities.registry import ENTITIES
 from app.configurations.integrations.registry import INTEGRATIONS
 from app.configurations.parameters import PARAMETERS
-from app.configurations.schemas import APIIntegrationConfig
+from app.configurations.schemas import APIIntegrationConfig, RAGIntegrationConfig
 from app.configurations.tools.registry import TOOLS
+from app.knowledge_base.registry import KNOWLEDGE_BASES_BY_CODE
 
 
 # validate the relations
@@ -32,6 +33,10 @@ def validate_config() -> None:
             raise ValueError(
                 f"Tool '{tool.code}' references unknown integration '{tool.integration_code}'"
             )
+
+        if isinstance(integration, RAGIntegrationConfig):
+            if integration.knowledge_base_code not in KNOWLEDGE_BASES_BY_CODE:
+                raise ValueError(f"Unknown Knowledge Base: {integration.knowledge_base_code}")
 
         # Check required parameters against API mappings
         if isinstance(integration, APIIntegrationConfig):

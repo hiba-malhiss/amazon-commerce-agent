@@ -66,9 +66,11 @@ def numbered_cards(
     """
     cards: dict[str, NumberedCard] = {}  # by reference, so each entity gets one card
     for outcome in outcomes:
-        if outcome["status"] != "success" or not outcome["result"]:
+        # Only entity results become cards; passages never do
+        result = outcome["result"]
+        if outcome["status"] != "success" or not result or result["type"] != "entities":
             continue
-        for entity in outcome["result"]["entities"]:
+        for entity in result["entities"]:
             if len(cards) == settings.max_cards_per_reply:
                 break
             cards.setdefault(

@@ -96,7 +96,7 @@ async def api_call_node(state: ToolRequestState) -> ToolRequestUpdate:
         "outcome": {
             "id": state["id"],
             "status": "success",
-            "result": {"entities": entities},
+            "result": {"type": "entities", "entities": entities},
             "missing_parameters": [],
             "error": None,
             "status_code": status_code,

@@ -12,7 +12,7 @@ def check_references(
     """A question to ask when the results the user pointed at can't be trusted, else None.
     1. Every reference is a visible product. If not → ask.
     2. The quote's words are in the user's message. If not → ask.
-    3. The names in the quote fit 2+ products (and the user said nothing else to tell them apart) → ask.
+    3. The names in the quote fit 2+ products (and the user said nothing else to tell them apart)
     """
     references = request["referenced_entities"]
     if not references:
