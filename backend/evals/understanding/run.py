@@ -10,18 +10,15 @@ Results appear in LangSmith under Datasets → understanding-one-turn → Experi
 with one score per field, so a failure shows which part was wrong.
 """
 
-import argparse
 import asyncio
-import os
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langgraph.graph import END, START, StateGraph
-from langsmith import Client
 
 from app.agent.nodes.understand import understand_node
 from app.agent.state import AgentState
-from app.core.settings import settings
+from evals.common import run_experiment
 from evals.understanding.dataset import DATASET_NAME, EXAMPLES
 
 # The real Understanding node, alone: run inside a graph so its event writer works
@@ -121,41 +118,14 @@ def value_matches(want, got) -> bool:
 
 # --- Run ---------------------------------------------------------------------------
 
-
-def sync_dataset(client: Client, recreate: bool) -> None:
-    """Upload the cases once; --recreate replaces them after the cases change."""
-    if client.has_dataset(dataset_name=DATASET_NAME):
-        if not recreate:
-            return
-        client.delete_dataset(dataset_name=DATASET_NAME)
-    dataset = client.create_dataset(
-        DATASET_NAME, description="Understanding, one user message with no earlier turns"
-    )
-    client.create_examples(dataset_id=dataset.id, examples=EXAMPLES)
-
-
-async def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repeats", type=int, default=3, help="runs per case (LLMs vary)")
-    parser.add_argument("--recreate", action="store_true", help="re-upload the dataset")
-    args = parser.parse_args()
-
-    if not os.environ.get("LANGSMITH_API_KEY"):
-        raise SystemExit("LANGSMITH_API_KEY is not set: add it to backend/.env (not .env.example)")
-
-    client = Client()
-    sync_dataset(client, args.recreate)
-    await client.aevaluate(
-        understand,
-        data=DATASET_NAME,
-        evaluators=[request_count, tools, parameters, out_of_scope, correct],
-        experiment_prefix="understanding-one-turn",
-        metadata={"model": settings.llm_model},
-        num_repetitions=args.repeats,
-        max_concurrency=4,
-    )
-
-
 if __name__ == "__main__":
     load_dotenv()
-    asyncio.run(main())
+    asyncio.run(
+        run_experiment(
+            DATASET_NAME,
+            "Understanding, one user message with no earlier turns",
+            EXAMPLES,
+            understand,
+            [request_count, tools, parameters, out_of_scope, correct],
+        )
+    )

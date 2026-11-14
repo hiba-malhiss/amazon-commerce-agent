@@ -27,6 +27,9 @@ ENTITY REFERENCES
   them. They may point by number ("#2", "the second TV" = number 2 of the TV results,
   "the last one") or by description ("the Sony one", "the cheaper JBL").
 - reference_quote: the user's words that point at them, copied exactly from the message.
+- reference_position: when they point to an entity be place or detail. Places ("the third one",
+  "#3", "the last one") always count from VISIBLE RESULTS, never the order
+  products were mentioned in earlier messages or replies.
 - If no visible result fits, leave referenced_entities empty.
 
 SCOPE
