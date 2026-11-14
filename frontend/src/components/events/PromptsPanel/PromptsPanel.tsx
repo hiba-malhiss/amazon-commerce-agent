@@ -7,6 +7,11 @@ interface Props {
   prompts: PromptEvent[];
 }
 
+// First line of the prompt, skipping role labels like "[system]"
+function preview(prompt: string): string {
+  return prompt.split("\n").find((line) => line.trim() && !/^\[\w+\]$/.test(line.trim())) ?? "";
+}
+
 export function PromptsPanel({ prompts }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -15,7 +20,7 @@ export function PromptsPanel({ prompts }: Props) {
   }, [prompts.length]);
 
   if (prompts.length === 0) {
-    return <Typography.Text type="secondary">Send a message to see the system prompts.</Typography.Text>;
+    return <Typography.Text type="secondary">Send a message to see the prompts.</Typography.Text>;
   }
   return (
     <div className="prompts">
@@ -26,7 +31,7 @@ export function PromptsPanel({ prompts }: Props) {
           label: (
             <span className="prompts__label">
               <b>{p.node}</b>
-              <span className="prompts__preview">{p.prompt.trim().split("\n")[0]}</span>
+              <span className="prompts__preview">{preview(p.prompt)}</span>
             </span>
           ),
           children: <pre className="prompts__content">{p.prompt}</pre>,

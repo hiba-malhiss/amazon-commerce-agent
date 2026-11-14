@@ -68,7 +68,7 @@ export interface TraceEvent {
 export interface PromptEvent {
   interaction_id: string;
   node: string; // "understand" or "respond"
-  prompt: string;
+  prompt: string; // every message sent to the LLM, each labelled by role
 }
 
 export type ChatEvent =
