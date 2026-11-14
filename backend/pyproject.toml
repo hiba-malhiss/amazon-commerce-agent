@@ -10,6 +10,7 @@ dependencies = [
     "langchain-openai>=1.7.3",
     "langgraph>=1.2.19",
     "langgraph-checkpoint-postgres>=3.2.0",
+    "pgvector>=0.5.1",
     "psycopg[binary]>=3.3.6",
     "pymupdf<2",
     "python-dotenv>=1.2.4",

@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.conversations import models as conversation_models
 from app.database.base import Base
+from app.knowledge_base import models as knowledge_models
 from app.traces import models as trace_models
 
 config = context.config
@@ -26,7 +27,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Register application models for autogeneration
-_ = (conversation_models, trace_models)
+_ = (conversation_models, knowledge_models, trace_models)
 target_metadata = Base.metadata
 
 
