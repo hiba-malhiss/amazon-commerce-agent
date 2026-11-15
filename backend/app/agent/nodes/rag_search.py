@@ -54,9 +54,13 @@ async def rag_search_node(state: ToolRequestState) -> ToolRequestUpdate:
                 "relevance_threshold": threshold,
                 "chunks": [
                     {
+                        "chunk_id": chunk["chunk_id"],
                         "filename": chunk["filename"],
                         "section": chunk["section_title"],
+                        "page_start": chunk["page_start"],
+                        "page_end": chunk["page_end"],
                         "score": chunk["score"],
+                        "content": chunk["content"],
                     }
                     for chunk in chunks
                 ],
