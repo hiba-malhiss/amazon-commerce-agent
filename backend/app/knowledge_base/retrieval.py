@@ -13,11 +13,12 @@ async def search_chunks(
 ) -> list[RetrievedChunks]:
     """The chunks closest to the query in the integration's knowledge base, best first.
 
-    Only `ready` documents are searched. At most `top_k` passages come back, and only those
+    Only `ready` documents are searched. At most `top_k` chunks come back, and only those
     scoring at least `relevance_threshold` when it's set (score = cosine similarity, 0 to 1).
     """
     config = KNOWLEDGE_BASES_BY_CODE[integration.knowledge_base_code]
-    # creates a SQL expression that: calculates the cosine distance between The user's query embedding & each stored chunk embedding.
+    # creates a SQL expression that: calculates the cosine distance between
+    # The users query embedding AND each stored chunk embedding.
     distance = KnowledgeChunk.embedding.cosine_distance(await embed_query(query, config))
 
     rows = await session.execute(
@@ -31,7 +32,7 @@ async def search_chunks(
         .limit(integration.top_k)
     )
 
-    passages: list[RetrievedChunks] = [
+    chunks: list[RetrievedChunks] = [
         {
             "chunk_id": chunk.id,
             "content": chunk.content,
@@ -45,4 +46,4 @@ async def search_chunks(
         for chunk, filename, row_distance in rows
     ]
 
-    return [p for p in passages]
+    return chunks

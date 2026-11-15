@@ -47,7 +47,8 @@ class AgentStateUpdate(TypedDict, total=False):
     out_of_scope_reason: str | None
 
 
-type ToolStep = Literal["api_call", "missing_info", "fail"]
+# params_check decides missing / ready ("integration"); routing picks the integration node
+type ToolStep = Literal["integration", "missing_info", "fail"]
 
 
 class ToolRequestState(TypedDict):

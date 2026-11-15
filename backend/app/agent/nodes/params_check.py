@@ -34,9 +34,10 @@ def params_check_node(state: ToolRequestState) -> ToolRequestUpdate:
 
     # Find required parameters with missing values
     missing = [code for code in tool.required_parameters if request["parameters"].get(code) is None]
-    next_step = "missing_info" if missing else "api_call"
+    next_step = "missing_info" if missing else "integration"
 
-    # Parameter values are omitted; the api_call event shows what is sent
+    # Parameter values are omitted; the api_call / rag_search event shows what is sent.
+    # How the tool runs is decided by the edge after this node (route_after_params_check)
     writer(
         {
             "node": "params_check",

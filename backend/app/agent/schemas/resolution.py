@@ -80,12 +80,12 @@ class EntityResult(TypedDict):
     entities: list[MappedEntity]
 
 
-class PassageResult(TypedDict):
-    type: Literal["passages"]
-    passages: list[RetrievedChunks]
+class ChunkResult(TypedDict):
+    type: Literal["chunks"]
+    chunks: list[RetrievedChunks]
 
 
-type OutcomeResult = EntityResult | PassageResult
+type OutcomeResult = EntityResult | ChunkResult
 
 
 class RequestOutcome(TypedDict):
