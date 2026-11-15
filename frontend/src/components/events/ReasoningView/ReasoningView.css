@@ -1,0 +1,135 @@
+/* A vertical timeline: a dot per stage, joined by a line */
+.reasoning__timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reasoning__timeline--nested {
+  margin-top: 10px;
+}
+
+.reasoning__stage {
+  position: relative;
+  padding: 0 0 16px 22px;
+  font-size: 13px;
+}
+
+.reasoning__stage::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #52c41a;
+}
+
+.reasoning__stage::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  bottom: 2px;
+  left: 4px;
+  width: 2px;
+  background: #ececec;
+}
+
+.reasoning__stage:last-child::after {
+  display: none;
+}
+
+.reasoning__stage--running::before {
+  background: #1677ff;
+}
+
+.reasoning__stage--failed::before {
+  background: #ff4d4f;
+}
+
+.reasoning__stage-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.reasoning__stage-title {
+  font-weight: 600;
+}
+
+.reasoning__tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+}
+
+.reasoning__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.reasoning__card {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+}
+
+.reasoning__card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.reasoning__details {
+  margin-bottom: 8px;
+}
+
+.reasoning__details .ant-descriptions-item-label {
+  width: 130px;
+  font-size: 12px;
+}
+
+.reasoning__details .ant-descriptions-item-content {
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.reasoning__params {
+  border-collapse: collapse;
+}
+
+.reasoning__params td {
+  padding: 1px 10px 1px 0;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.reasoning__results {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.reasoning__results > li + li {
+  margin-top: 10px;
+}
+
+.reasoning__dropped {
+  color: #8c8c8c;
+}
+
+.reasoning__content {
+  max-height: 260px;
+  margin: 0;
+  overflow: auto;
+  font-family: inherit;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
