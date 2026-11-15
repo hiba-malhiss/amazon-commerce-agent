@@ -14,6 +14,8 @@ from app.database.session import get_db
 from app.knowledge_base.exceptions import KnowledgeBaseError
 from app.knowledge_base.schemas import (
     KnowledgeBaseSummary,
+    KnowledgeChunkListResponse,
+    KnowledgeChunkResponse,
     KnowledgeDocumentListResponse,
     KnowledgeDocumentResponse,
 )
@@ -67,6 +69,21 @@ async def upload_document(
     if path is not None:
         background_tasks.add_task(index_in_background, document.id, path, kb_code)
     return KnowledgeDocumentResponse.model_validate(document)
+
+
+@router.get("/{kb_code}/documents/{document_id}/chunks", response_model=KnowledgeChunkListResponse)
+async def list_chunks(
+    kb_code: str, document_id: UUID, session: Annotated[AsyncSession, Depends(get_db)]
+) -> KnowledgeChunkListResponse:
+    service = KnowledgeBaseService(session)
+    try:
+        chunks = await service.list_chunks(kb_code, document_id)
+    except KnowledgeBaseError as error:
+        raise http_error(error) from error
+
+    return KnowledgeChunkListResponse(
+        chunks=[KnowledgeChunkResponse.model_validate(chunk) for chunk in chunks]
+    )
 
 
 @router.delete("/{kb_code}/documents/{document_id}", status_code=204)

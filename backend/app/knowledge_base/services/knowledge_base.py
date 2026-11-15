@@ -10,9 +10,9 @@ from app.configurations.schemas import KnowledgeBaseConfig
 from app.core.settings import settings
 from app.database.session import AsyncSessionLocal
 from app.knowledge_base.exceptions import FileTooLargeError, KnowledgeBaseError, NotFoundError
-from app.knowledge_base.models import KnowledgeDocument
+from app.knowledge_base.models import KnowledgeChunk, KnowledgeDocument
 from app.knowledge_base.processing.converter import SUPPORTED_SUFFIXES
-from app.knowledge_base.repositories import KnowledgeDocumentRepository
+from app.knowledge_base.repositories import KnowledgeChunkRepository, KnowledgeDocumentRepository
 from app.knowledge_base.services.indexing import KnowledgeIndexer
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ class KnowledgeBaseService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.documents = KnowledgeDocumentRepository(session)
+        self.chunks = KnowledgeChunkRepository(session)
         self.indexer = KnowledgeIndexer(session)
 
     def list_knowledge_bases(self) -> list[KnowledgeBaseConfig]:
@@ -30,6 +31,18 @@ class KnowledgeBaseService:
     async def list_documents(self, kb_code: str) -> list[KnowledgeDocument]:
         config = knowledge_base(kb_code)
         return await self.documents.list_by_knowledge_base(config.code)
+
+    async def list_chunks(self, kb_code: str, document_id: UUID) -> list[KnowledgeChunk]:
+        """A document's chunks in order, as they were indexed (empty until it's `ready`)."""
+        await self.get_document(kb_code, document_id)
+        return await self.chunks.list_by_document(document_id)
+
+    async def get_document(self, kb_code: str, document_id: UUID) -> KnowledgeDocument:
+        config = knowledge_base(kb_code)
+        document = await self.documents.get_by_id(document_id)
+        if document is None or document.knowledge_base_code != config.code:
+            raise NotFoundError("Document not found")
+        return document
 
     async def upload_document(
         self, kb_code: str, filename: str, content: bytes
@@ -62,9 +75,7 @@ class KnowledgeBaseService:
         """Delete the document, its chunks, and its file. Safe while it's being indexed: the
         indexing stops without writing anything."""
         config = knowledge_base(kb_code)
-        document = await self.documents.get_by_id(document_id)
-        if document is None or document.knowledge_base_code != config.code:
-            raise NotFoundError("Document not found")
+        document = await self.get_document(kb_code, document_id)
 
         path = stored_file(config, document.sha256, Path(document.filename).suffix.lower())
         await self.documents.delete(document)

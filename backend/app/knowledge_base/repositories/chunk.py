@@ -15,6 +15,14 @@ class KnowledgeChunkRepository:
         self.session.add_all(chunks)
         await self.session.flush()
 
+    async def list_by_document(self, document_id: UUID) -> list[KnowledgeChunk]:
+        result = await self.session.scalars(
+            select(KnowledgeChunk)
+            .where(KnowledgeChunk.document_id == document_id)
+            .order_by(KnowledgeChunk.chunk_index)
+        )
+        return list(result.all())
+
     async def delete_by_document(self, document_id: UUID) -> None:
         await self.session.execute(
             delete(KnowledgeChunk).where(KnowledgeChunk.document_id == document_id)
