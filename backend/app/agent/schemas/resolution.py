@@ -64,7 +64,7 @@ class NumberedCard(TypedDict):
     entity: MappedEntity
 
 
-class RetrievedPassage(TypedDict):
+class RetrievedChunks(TypedDict):
     chunk_id: str
     content: str
     document_id: str
@@ -82,7 +82,7 @@ class EntityResult(TypedDict):
 
 class PassageResult(TypedDict):
     type: Literal["passages"]
-    passages: list[RetrievedPassage]
+    passages: list[RetrievedChunks]
 
 
 type OutcomeResult = EntityResult | PassageResult
