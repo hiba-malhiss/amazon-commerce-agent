@@ -1,0 +1,43 @@
+.knowledge {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+.knowledge__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.knowledge__title {
+  margin: 0 0 4px !important;
+}
+
+.knowledge__actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.knowledge__select {
+  min-width: 180px;
+}
+
+.knowledge__error {
+  margin-bottom: 16px;
+}
+
+.knowledge__file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.knowledge__row-actions {
+  display: flex;
+  gap: 4px;
+}

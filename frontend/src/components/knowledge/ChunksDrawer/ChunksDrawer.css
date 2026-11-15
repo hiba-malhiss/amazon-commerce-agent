@@ -1,0 +1,49 @@
+.chunks {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chunks__loading {
+  display: block;
+  margin: 40px auto;
+}
+
+.chunk {
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.chunk__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.chunk__section {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chunk__tokens {
+  color: #8c8c8c;
+}
+
+.chunk__content {
+  margin: 0;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

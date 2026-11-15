@@ -26,6 +26,42 @@ export interface MessageResponse {
   body: MessageBody;
 }
 
+export interface KnowledgeBaseSummary {
+  code: string;
+  name: string;
+}
+
+export type DocumentStatus = "indexing" | "ready" | "failed";
+
+export interface KnowledgeDocument {
+  id: string;
+  knowledge_base_code: string;
+  filename: string;
+  status: DocumentStatus;
+  error: string | null; // why indexing failed
+  chunk_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface KnowledgeChunk {
+  id: string;
+  chunk_index: number;
+  section_path: string | null; // e.g. "Returns > Electronics"
+  page_start: number | null; // PDFs only
+  page_end: number | null;
+  token_count: number;
+  content: string;
+}
+
+export interface KnowledgeChunkListResponse {
+  chunks: KnowledgeChunk[];
+}
+
+export interface KnowledgeDocumentListResponse {
+  documents: KnowledgeDocument[];
+}
+
 export interface ThreadResponse {
   thread_id: string;
 }

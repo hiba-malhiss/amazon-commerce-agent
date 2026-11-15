@@ -3,3 +3,11 @@ export const MAX_MESSAGE_LENGTH = 4000;
 
 // Threads loaded per page in the sidebar (more load on scroll)
 export const THREADS_PAGE_SIZE = 20;
+
+// Knowledge base uploads. Mirrors backend: converter.py → SUPPORTED_SUFFIXES,
+// settings.py → max_upload_mb
+export const KNOWLEDGE_FILE_TYPES = [".pdf", ".txt", ".md"];
+export const MAX_UPLOAD_MB = 20;
+
+// How often the document list refreshes while a file is being indexed
+export const KNOWLEDGE_POLL_MS = 2000;
