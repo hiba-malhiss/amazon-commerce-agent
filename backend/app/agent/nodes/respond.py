@@ -47,6 +47,25 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
         for card in numbered_cards(collected, state.get("visible_entities", []))
     ]
 
+    documents = [
+        {
+            "number": number,
+            "request_id": outcome_id,
+            "source": chunk["filename"],
+            "section": chunk["section_title"],
+            "text": chunk["content"],
+        }
+        for number, (outcome_id, chunk) in enumerate(
+            (
+                (outcome["id"], chunk)
+                for outcome in collected
+                if outcome["result"] and outcome["result"]["type"] == "chunks"
+                for chunk in outcome["result"]["chunks"]
+            ),
+            start=1,
+        )
+    ]
+
     # Build system instructions
     system_message = SystemMessage(content=GENERATE_RESPONSE_PROMPT)
 
@@ -58,6 +77,7 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
                 {
                     "outcomes": outcomes,
                     "cards": cards,
+                    "documents": documents,
                     "out_of_scope": state.get("out_of_scope", False),
                     "out_of_scope_reason": state.get("out_of_scope_reason"),
                 },
