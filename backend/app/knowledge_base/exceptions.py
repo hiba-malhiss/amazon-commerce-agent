@@ -10,3 +10,9 @@ class NotFoundError(KnowledgeBaseError):
 
 class FileTooLargeError(KnowledgeBaseError):
     status_code = 413
+
+
+class IndexingUnavailableError(KnowledgeBaseError):
+    """The indexing queue (Redis) can't be reached."""
+
+    status_code = 503
