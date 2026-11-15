@@ -80,4 +80,14 @@ PARAMETERS = [
         type="list",
         description="Key feature bullet points of a product",
     ),
+    ParameterConfig(
+        code="query",
+        name="Query",
+        type="string",
+        description=(
+            "The question to search documents for, written to stand alone: include what "
+            "earlier messages refer to ('return window for opened headphones', not 'what "
+            "about returning it?')."
+        ),
+    ),
 ]

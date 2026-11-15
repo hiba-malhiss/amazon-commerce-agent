@@ -95,6 +95,7 @@ class APIIntegrationConfig(IntegrationConfig):
 class RAGIntegrationConfig(IntegrationConfig):
     type: Literal["rag"] = "rag"
     knowledge_base_code: str
+    query_parameter: ParameterCode = "query"
     top_k: int = Field(default=5, gt=0)
     relevance_threshold: float | None = None
 

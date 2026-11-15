@@ -38,6 +38,12 @@ def validate_config() -> None:
             if integration.knowledge_base_code not in KNOWLEDGE_BASES_BY_CODE:
                 raise ValueError(f"Unknown Knowledge Base: {integration.knowledge_base_code}")
 
+            if integration.query_parameter not in tool.required_parameters:
+                raise ValueError(
+                    f"Tool '{tool.code}' must require '{integration.query_parameter}', "
+                    f"the search text of integration '{integration.code}'"
+                )
+
         # Check required parameters against API mappings
         if isinstance(integration, APIIntegrationConfig):
             mapped_parameters = set(integration.query_params.values()) | set(
