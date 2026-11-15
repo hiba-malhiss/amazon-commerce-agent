@@ -3,9 +3,8 @@ from typing import Literal
 from langgraph.types import Send
 
 from app.agent.state import AgentState, ToolRequestState
-from app.configurations.integrations.registry import INTEGRATIONS_BY_CODE
+from app.configurations.integrations.registry import tool_integration
 from app.configurations.schemas import RAGIntegrationConfig
-from app.configurations.tools.registry import TOOLS_BY_CODE
 
 type ToolRoute = Literal["api_call", "rag_search", "missing_info", "fail"]
 
@@ -17,8 +16,7 @@ def route_after_params_check(state: ToolRequestState) -> ToolRoute:
     if step != "integration":
         return step
 
-    tool = TOOLS_BY_CODE.get(state["request"]["tool"])
-    integration = INTEGRATIONS_BY_CODE.get(tool.integration_code or "") if tool else None
+    integration = tool_integration(state["request"]["tool"])
     return "rag_search" if isinstance(integration, RAGIntegrationConfig) else "api_call"
 
 

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -35,6 +37,10 @@ class Settings(BaseSettings):
     max_requests_per_turn: int = Field(default=5, gt=0)
     max_parallel_tools: int = Field(default=3, gt=0)
     max_user_message_length: int = Field(default=4000, gt=0)
+
+    # Knowledge base uploads: where files are kept, and the largest file accepted
+    knowledge_storage_dir: Path = Path("storage/knowledge")
+    max_upload_mb: int = Field(default=20, gt=0)
 
 
 settings = Settings()

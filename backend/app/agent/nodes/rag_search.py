@@ -3,11 +3,11 @@ import time
 from langgraph.config import get_stream_writer
 
 from app.agent.state import ToolRequestState, ToolRequestUpdate
-from app.configurations.integrations.registry import INTEGRATIONS_BY_CODE
+from app.agent.utils.timing import elapsed_ms
+from app.configurations.integrations.registry import tool_integration
 from app.configurations.schemas import RAGIntegrationConfig
-from app.configurations.tools.registry import TOOLS_BY_CODE
 from app.database.session import AsyncSessionLocal
-from app.knowledge_base.retrieval import search_chunks
+from app.knowledge_base.services.retrieval import search_chunks
 
 
 async def rag_search_node(state: ToolRequestState) -> ToolRequestUpdate:
@@ -15,10 +15,7 @@ async def rag_search_node(state: ToolRequestState) -> ToolRequestUpdate:
     writer = get_stream_writer()
     request = state["request"]
 
-    tool = TOOLS_BY_CODE.get(request["tool"])
-    integration = (
-        INTEGRATIONS_BY_CODE.get(tool.integration_code) if tool and tool.integration_code else None
-    )
+    integration = tool_integration(request["tool"])
     if not isinstance(integration, RAGIntegrationConfig):
         return failed(state, "Unknown or unsupported integration")
 
@@ -96,7 +93,3 @@ def failed(
             "error": "Unable to search the documents",
         }
     }
-
-
-def elapsed_ms(started: float) -> int:
-    return round((time.perf_counter() - started) * 1000)

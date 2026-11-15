@@ -1,11 +1,10 @@
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.schemas.resolution import RetrievedChunks
+from app.configurations.knowledge_bases.registry import KNOWLEDGE_BASES_BY_CODE
 from app.configurations.schemas import RAGIntegrationConfig
-from app.knowledge_base.embedding import embed_query
-from app.knowledge_base.models import KnowledgeChunk, KnowledgeDocument
-from app.knowledge_base.registry import KNOWLEDGE_BASES_BY_CODE
+from app.knowledge_base.processing.embedding import embed_query
+from app.knowledge_base.repositories import KnowledgeChunkRepository
 
 
 async def search_chunks(
@@ -18,19 +17,8 @@ async def search_chunks(
     threshold, so traces and evaluations can still see the chunks it rejects.
     """
     config = KNOWLEDGE_BASES_BY_CODE[integration.knowledge_base_code]
-    # creates a SQL expression that: calculates the cosine distance between
-    # The users query embedding AND each stored chunk embedding.
-    distance = KnowledgeChunk.embedding.cosine_distance(await embed_query(query, config))
-
-    rows = await session.execute(
-        select(KnowledgeChunk, KnowledgeDocument.filename, distance.label("distance"))
-        .join(KnowledgeDocument)
-        .where(
-            KnowledgeChunk.knowledge_base_code == config.code,
-            KnowledgeDocument.status == "ready",
-        )
-        .order_by(distance)
-        .limit(integration.top_k)
+    rows = await KnowledgeChunkRepository(session).search(
+        config.code, await embed_query(query, config), integration.top_k
     )
 
     chunks: list[RetrievedChunks] = [

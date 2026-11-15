@@ -2,8 +2,8 @@ from haystack import Document
 from haystack.components.embedders import OpenAIDocumentEmbedder, OpenAITextEmbedder
 from haystack.utils import Secret
 
+from app.configurations.schemas import KnowledgeBaseConfig
 from app.core.settings import settings
-from app.knowledge_base.config import KnowledgeBaseConfig
 from app.knowledge_base.models import EMBEDDING_DIMENSIONS
 
 # Chunks per embedding API call

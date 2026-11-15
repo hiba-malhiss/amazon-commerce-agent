@@ -1,9 +1,9 @@
 from app.configurations.entities.registry import ENTITIES
 from app.configurations.integrations.registry import INTEGRATIONS
+from app.configurations.knowledge_bases.registry import KNOWLEDGE_BASES_BY_CODE
 from app.configurations.parameters import PARAMETERS
 from app.configurations.schemas import APIIntegrationConfig, RAGIntegrationConfig
 from app.configurations.tools.registry import TOOLS
-from app.knowledge_base.registry import KNOWLEDGE_BASES_BY_CODE
 
 
 # validate the relations

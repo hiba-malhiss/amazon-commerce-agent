@@ -3,8 +3,8 @@ from pathlib import Path
 
 from haystack import Document
 
-from app.knowledge_base.config import KnowledgeBaseConfig
-from app.knowledge_base.converter import convert_file
+from app.configurations.schemas import KnowledgeBaseConfig
+from app.knowledge_base.processing.converter import convert_file
 
 from .paragraph import split_by_paragraph
 from .structure import merge_small_sections, split_by_structure

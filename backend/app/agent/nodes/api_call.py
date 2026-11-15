@@ -9,14 +9,14 @@ from pydantic import JsonValue
 
 from app.agent.schemas.execution import ApiRequest, MappedEntity, ParameterValue
 from app.agent.state import ToolRequestState, ToolRequestUpdate
+from app.agent.utils.timing import elapsed_ms
 from app.configurations.entities.registry import ENTITIES_BY_CODE
-from app.configurations.integrations.registry import INTEGRATIONS_BY_CODE
+from app.configurations.integrations.registry import tool_integration
 from app.configurations.schemas import (
     APIIntegrationConfig,
     AuthenticationConfig,
     EntityMappingConfig,
 )
-from app.configurations.tools.registry import TOOLS_BY_CODE
 
 load_dotenv()
 
@@ -25,11 +25,7 @@ async def api_call_node(state: ToolRequestState) -> ToolRequestUpdate:
     writer = get_stream_writer()
     request = state["request"]
 
-    # Resolve the integration configured for this tool
-    tool = TOOLS_BY_CODE.get(request["tool"])
-    integration = (
-        INTEGRATIONS_BY_CODE.get(tool.integration_code) if tool and tool.integration_code else None
-    )
+    integration = tool_integration(request["tool"])
     if not isinstance(integration, APIIntegrationConfig):
         return failed(state, writer, "Unknown or unsupported integration")
 
@@ -235,7 +231,3 @@ def get_path(data: JsonValue, path: str) -> JsonValue:
             return None
         value = value.get(key)
     return value
-
-
-def elapsed_ms(started: float) -> int:
-    return round((time.perf_counter() - started) * 1000)

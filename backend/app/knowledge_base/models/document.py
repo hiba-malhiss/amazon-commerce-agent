@@ -21,6 +21,9 @@ class KnowledgeDocument(Base):
     __tablename__ = "knowledge_documents"
     # The same file is indexed once per knowledge base
     __table_args__ = (UniqueConstraint("knowledge_base_code", "sha256"),)
+    # automatically fetch database-generated default values
+    # and populate the Python object after an INSERT or UPDATE
+    __mapper_args__ = {"eager_defaults": True}
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     knowledge_base_code: Mapped[str] = mapped_column(String(100), index=True)

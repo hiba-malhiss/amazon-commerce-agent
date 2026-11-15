@@ -98,12 +98,6 @@ def split_long_paragraph(
 ) -> list[Document]:
     """Split a long paragraph into sentence groups with overlap."""
 
-    if max_tokens <= 0:
-        raise ValueError("max_tokens must be positive")
-
-    if overlap_sentences < 0:
-        raise ValueError("overlap_sentences cannot be negative")
-
     sentences = split_into_sentences(paragraph)
 
     if not sentences and paragraph.strip():
