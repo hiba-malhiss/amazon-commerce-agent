@@ -3,6 +3,8 @@ from pathlib import Path
 import pymupdf
 from haystack import Document
 
+SUPPORTED_SUFFIXES = {".txt", ".md", ".pdf"}
+
 
 def convert_file(
     path: Path,
