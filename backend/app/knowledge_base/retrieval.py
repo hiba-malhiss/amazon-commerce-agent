@@ -13,8 +13,9 @@ async def search_chunks(
 ) -> list[RetrievedChunks]:
     """The chunks closest to the query in the integration's knowledge base, best first.
 
-    Only `ready` documents are searched. At most `top_k` chunks come back, and only those
-    scoring at least `relevance_threshold` when it's set (score = cosine similarity, 0 to 1).
+    Only `ready` documents are searched. The `top_k` closest chunks come back with their
+    score (cosine similarity, 0 to 1), unfiltered: the caller applies the relevance
+    threshold, so traces and evaluations can still see the chunks it rejects.
     """
     config = KNOWLEDGE_BASES_BY_CODE[integration.knowledge_base_code]
     # creates a SQL expression that: calculates the cosine distance between

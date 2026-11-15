@@ -43,6 +43,10 @@ async def rag_search_node(state: ToolRequestState) -> ToolRequestUpdate:
     except Exception as error:
         return failed(state, str(error), elapsed_ms(started))
 
+    # Only chunks at or above the threshold reach the reply; the trace shows them all
+    threshold = integration.relevance_threshold
+    relevant = [c for c in chunks if threshold is None or c["score"] >= threshold]
+
     writer(
         {
             "node": "rag_search",
@@ -50,7 +54,7 @@ async def rag_search_node(state: ToolRequestState) -> ToolRequestUpdate:
             "data": {
                 "request_id": state["id"],
                 "duration_ms": elapsed_ms(started),
-                # Where each result came from and how close it was; the text is left out
+                "relevance_threshold": threshold,
                 "chunks": [
                     {
                         "filename": chunk["filename"],
@@ -65,8 +69,8 @@ async def rag_search_node(state: ToolRequestState) -> ToolRequestUpdate:
     return {
         "outcome": {
             "id": state["id"],
-            "status": "success",
-            "result": {"type": "chunks", "chunks": chunks},
+            "status": "success" if relevant else "no_relevant_results",
+            "result": {"type": "chunks", "chunks": relevant},
             "missing_parameters": [],
             "error": None,
         }

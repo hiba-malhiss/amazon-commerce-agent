@@ -90,7 +90,7 @@ type OutcomeResult = EntityResult | ChunkResult
 
 class RequestOutcome(TypedDict):
     id: str
-    status: Literal["success", "fail", "missing_info", "needs_clarification"]
+    status: Literal["success", "no_relevant_results", "fail", "missing_info", "needs_clarification"]
     result: OutcomeResult | None
     missing_parameters: list[str]
     error: str | None

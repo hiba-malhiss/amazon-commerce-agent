@@ -6,4 +6,5 @@ POLICIES_RAG = RAGIntegrationConfig(
     description="Search store policy documents",
     knowledge_base_code="store_policies",
     top_k=5,
+    relevance_threshold=0.3,
 )
