@@ -113,7 +113,7 @@ cd backend
 Start the FastAPI application with automatic reload enabled:
 
 ```bash
-.venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+./scripts/dev.sh
 ```
 
 The backend will be available at:

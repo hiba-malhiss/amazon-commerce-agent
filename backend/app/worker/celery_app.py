@@ -30,3 +30,13 @@ celery_app.conf.update(
     task_ignore_result=True,
     broker_connection_retry_on_startup=True,
 )
+
+
+def indexing_worker_online() -> bool:
+    """Whether at least one Celery worker is running to index uploads. Used by /health, so a
+    missing worker shows up before a document sits on `indexing` forever. Blocks up to ~1s
+    waiting for a reply, so callers should run it off the event loop."""
+    try:
+        return bool(celery_app.control.ping(timeout=1.0))
+    except Exception:
+        return False  # broker unreachable: treat as no worker

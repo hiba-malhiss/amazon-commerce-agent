@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,6 +9,7 @@ from app.conversations.routes import router as conversations_router
 from app.conversations.websocket import router as websocket_router
 from app.database.checkpointer import postgres_checkpointer
 from app.knowledge_base.routes import router as knowledge_base_router
+from app.worker.celery_app import indexing_worker_online
 
 
 @asynccontextmanager
@@ -31,7 +33,9 @@ app = FastAPI(
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    # "down" means uploads will sit on `indexing`: start the worker (see scripts/dev.sh)
+    worker_online = await asyncio.to_thread(indexing_worker_online)
+    return {"status": "ok", "indexing_worker": "up" if worker_online else "down"}
 
 
 app.include_router(conversations_router)
