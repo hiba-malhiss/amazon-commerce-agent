@@ -18,6 +18,7 @@ from app.knowledge_base.exceptions import (
 from app.knowledge_base.models import KnowledgeChunk, KnowledgeDocument
 from app.knowledge_base.processing.converter import SUPPORTED_SUFFIXES
 from app.knowledge_base.repositories import KnowledgeChunkRepository, KnowledgeDocumentRepository
+from app.knowledge_base.services.events import publish_document_event
 from app.knowledge_base.services.indexing import KnowledgeIndexer
 from app.worker.celery_app import celery_app
 
@@ -92,6 +93,7 @@ class KnowledgeBaseService:
         await self.session.commit()
 
         await self.queue_indexing(document, path, config)
+        await publish_document_event(document)  # other open pages see the new upload
         return document
 
     async def queue_indexing(
@@ -121,6 +123,7 @@ class KnowledgeBaseService:
         await self.documents.delete(document)
         await self.session.commit()
         path.unlink(missing_ok=True)
+        await publish_document_event(document, deleted=True)
 
 
 def knowledge_base(code: str) -> KnowledgeBaseConfig:

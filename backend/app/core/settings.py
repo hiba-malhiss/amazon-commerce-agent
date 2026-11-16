@@ -42,9 +42,10 @@ class Settings(BaseSettings):
     knowledge_storage_dir: Path = Path("storage/knowledge")
     max_upload_mb: int = Field(default=20, gt=0)
 
-    # Celery (background indexing): Redis from docker-compose. A failed indexing is retried
-    # this many times, waiting longer each time (up to 30s, 60s, 120s ...)
-    celery_broker_url: str = "redis://localhost:6379/0"
+    # Redis from docker-compose: Celery's job queue (background indexing) and the live
+    # document updates. A failed indexing is retried this many times, waiting longer each
+    # time (up to 30s, 60s, 120s ...)
+    redis_url: str = "redis://localhost:6379/0"
     indexing_max_retries: int = Field(default=3, ge=0)
 
 

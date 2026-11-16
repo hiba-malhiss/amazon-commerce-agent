@@ -9,7 +9,7 @@ from app.core.settings import settings
 
 celery_app = Celery(
     "amazon_commerce_agent",
-    broker=settings.celery_broker_url,
+    broker=settings.redis_url,
     include=["app.knowledge_base.tasks"],  # task path
 )
 

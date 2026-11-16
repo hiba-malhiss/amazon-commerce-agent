@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -21,3 +22,15 @@ class KnowledgeDocumentResponse(BaseModel):
 
 class KnowledgeDocumentListResponse(BaseModel):
     documents: list[KnowledgeDocumentResponse]
+
+
+# What the worker is doing to an `indexing` document (none yet: it's queued)
+IndexingStep = Literal["chunking", "embedding", "retrying"]
+
+
+class DocumentEvent(BaseModel):
+    """A document change, pushed live to the knowledge base page."""
+
+    type: Literal["updated", "deleted"]
+    document: KnowledgeDocumentResponse
+    step: IndexingStep | None = None
