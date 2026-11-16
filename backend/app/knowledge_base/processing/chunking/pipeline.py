@@ -4,7 +4,7 @@ from pathlib import Path
 from haystack import Document
 
 from app.configurations.schemas import KnowledgeBaseConfig
-from app.knowledge_base.processing.converter import convert_file
+from app.knowledge_base.processing.converter import extract_document_content
 
 from .paragraph import split_by_paragraph
 from .structure import merge_small_sections, split_by_structure
@@ -14,7 +14,7 @@ from .tokens import count_tokens
 def chunk_file(path: Path, document_id: str, config: KnowledgeBaseConfig) -> list[Document]:
     """Read a file and split it into chunks ready to embed."""
 
-    return chunk_documents(convert_file(path, document_id, config.code), config)
+    return chunk_documents(extract_document_content(path, document_id, config.code), config)
 
 
 def chunk_documents(documents: list[Document], config: KnowledgeBaseConfig) -> list[Document]:

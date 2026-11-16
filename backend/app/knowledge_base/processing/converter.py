@@ -1,47 +1,31 @@
 from pathlib import Path
 
-import pymupdf
 from haystack import Document
+
+from .converters.pdf import convert_pdf
+from .converters.text import convert_text
 
 SUPPORTED_SUFFIXES = {".txt", ".md", ".pdf"}
 
 
-def convert_file(
-    path: Path,
-    document_id: str,
-    knowledge_base_code: str,
+def extract_document_content(
+    path: Path, document_id: str, knowledge_base_code: str
 ) -> list[Document]:
-    """Read a supported file and return Haystack Documents."""
+    """Read a supported file into Haystack Documents, dispatching on the file type. Each
+    converter keeps whatever structure it can (Markdown headings, PDF font sizes) so the
+    chunker can split by section."""
 
     metadata = {
         "document_id": document_id,
         "knowledge_base_code": knowledge_base_code,
         "filename": path.name,
     }
+    suffix = path.suffix.lower()
 
-    if path.suffix.lower() in {".txt", ".md"}:
-        text = path.read_text(encoding="utf-8")
-
-        documents = [Document(content=text, meta=metadata)] if text.strip() else []
-
-    elif path.suffix.lower() == ".pdf":
-        documents = []
-
-        with pymupdf.open(path) as pdf:
-            for page_number, page in enumerate(pdf, start=1):
-                text = page.get_text("text", sort=True)
-
-                if text.strip():
-                    documents.append(
-                        Document(
-                            content=text,
-                            meta={
-                                **metadata,
-                                "page_start": page_number,
-                                "page_end": page_number,
-                            },
-                        )
-                    )
+    if suffix in {".txt", ".md"}:
+        documents = convert_text(path, metadata)
+    elif suffix == ".pdf":
+        documents = convert_pdf(path, metadata)
     else:
         raise ValueError(f"Unsupported file type: {path.suffix}")
 
