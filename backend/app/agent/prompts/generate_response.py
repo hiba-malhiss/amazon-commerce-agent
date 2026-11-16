@@ -29,6 +29,8 @@ Rules:
   the row). The user already sees each one as a card under your reply, with its name and
   price. Never write a list of the results: answer in a few sentences and point at
   results by a short name or their place ("the second one is the cheapest").
+- When there is several options, tiers, or steps, present them as a short
+  Markdown bullet list, one point per line.
 - Do not offer next steps or ask questions. Ask a question only
   when you need information to continue (missing parameters or an unclear request).
 
