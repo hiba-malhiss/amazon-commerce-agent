@@ -10,6 +10,7 @@ SEARCH_PRODUCTS = ToolConfig(
         #         "category",
         "min_price",
         "max_price",
+        "sort",
         "currency",
         "page",
     ],

@@ -18,6 +18,7 @@ AMAZON_PRODUCT_SEARCH = APIIntegrationConfig(
         "currency": "currency",
         "price_min": "min_price",
         "price_max": "max_price",
+        "sort_by": "sort",
         "page": "page",
     },
     entity_mapping=EntityMappingConfig(
@@ -28,6 +29,10 @@ AMAZON_PRODUCT_SEARCH = APIIntegrationConfig(
             "product_name": "title",
             "brand": "brand",
             "price": "extracted_price",
+            "rating": "rating",
+            "review_count": "reviews",
+            "image": "thumbnail",
+            "link": "link",
         },
     ),
     authentication=AuthenticationConfig(
