@@ -18,6 +18,7 @@ from app.conversations.schemas.message import (
     MessageResponse,
 )
 from app.core.settings import settings
+from app.traces.repositories.trace import TraceRepository
 
 
 class ConversationService:
@@ -26,6 +27,7 @@ class ConversationService:
         self.threads = ThreadRepository(session)
         self.interactions = InteractionRepository(session)
         self.messages = MessageRepository(session)
+        self.traces = TraceRepository(session)
 
     async def get_or_create_thread(
         self,
@@ -96,6 +98,7 @@ class ConversationService:
 
         # Execute LangGraph. Nodes emit their own trace events with get_stream_writer()
         final_state = None
+        trace_events: list[dict[str, Any]] = []
         async for event in graph.astream(
             {
                 "messages": [
@@ -116,13 +119,16 @@ class ConversationService:
 
             elif event["type"] == "custom":
                 data = {"interaction_id": str(interaction.id), **event["data"]}
-                # Prompt events: {"kind": "prompt", "node", "prompt": <the system prompt>}
+                # Prompt events: {"kind": "prompt", "node", "prompt": <the system prompt>}.
+                # Streamed live for the UI, but not stored in the trace (they're large).
                 if data.pop("kind", None) == "prompt":
                     if on_prompt:
                         await on_prompt(data)
                 # Trace events: {"node", "status": started | completed | failed, "data": {...}}
-                elif on_trace:
-                    await on_trace(data)
+                else:
+                    trace_events.append(data)
+                    if on_trace:
+                        await on_trace(data)
 
         if final_state is None:
             raise RuntimeError("No final state received")
@@ -149,6 +155,13 @@ class ConversationService:
             role="assistant",
             content=reply,
             entities=cards,
+        )
+
+        # Persist the interaction's trace (events + prompts) for later debugging
+        await self.traces.create(
+            interaction_id=interaction.id,
+            thread_id=thread.id,
+            data={"events": trace_events},
         )
 
         await self.session.commit()
