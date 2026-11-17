@@ -11,6 +11,7 @@ from app.agent.prompts.generate_response import GENERATE_RESPONSE_PROMPT, NO_RES
 from app.agent.state import AgentState, AgentStateUpdate
 from app.agent.utils.entities import numbered_cards
 from app.agent.utils.prompts import emit_prompt
+from app.configurations.agent import AGENT_OBJECTIVE
 from app.core.settings import settings
 from app.llm.client import llm_client
 
@@ -66,8 +67,10 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
         )
     ]
 
-    # Build system instructions
-    system_message = SystemMessage(content=GENERATE_RESPONSE_PROMPT if not collected else NO_RESULTS_PROMPT)
+    if collected:
+        system_message = SystemMessage(content=GENERATE_RESPONSE_PROMPT)
+    else:
+        system_message = SystemMessage(content=NO_RESULTS_PROMPT.format(objective=AGENT_OBJECTIVE))
 
     # Provide current execution results
     outcomes_message = HumanMessage(
