@@ -7,7 +7,7 @@ from langchain_core.messages.utils import (
 )
 from langgraph.config import get_stream_writer
 
-from app.agent.prompts.generate_response import GENERATE_RESPONSE_PROMPT
+from app.agent.prompts.generate_response import GENERATE_RESPONSE_PROMPT, NO_RESULTS_PROMPT
 from app.agent.state import AgentState, AgentStateUpdate
 from app.agent.utils.entities import numbered_cards
 from app.agent.utils.prompts import emit_prompt
@@ -67,7 +67,7 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
     ]
 
     # Build system instructions
-    system_message = SystemMessage(content=GENERATE_RESPONSE_PROMPT)
+    system_message = SystemMessage(content=GENERATE_RESPONSE_PROMPT if not collected else NO_RESULTS_PROMPT)
 
     # Provide current execution results
     outcomes_message = HumanMessage(
