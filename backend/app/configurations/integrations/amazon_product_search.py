@@ -18,7 +18,8 @@ AMAZON_PRODUCT_SEARCH = APIIntegrationConfig(
         "currency": "currency",
         "price_min": "min_price",
         "price_max": "max_price",
-        "sort_by": "sort",
+        # "sort_by": "sort" removed for now: sorting a broad keyword by price on the API side
+        # returns irrelevant cheap accessories (a $3 sticker for "cheapest tv").
         "page": "page",
     },
     entity_mapping=EntityMappingConfig(

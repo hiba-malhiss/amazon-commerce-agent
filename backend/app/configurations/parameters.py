@@ -92,17 +92,17 @@ PARAMETERS = [
         type="list",
         description="Key feature bullet points of a product",
     ),
-    ParameterConfig(
-        code="sort",
-        name="Sort order",
-        type="string",
-        description=(
-            "How to order the search results, only when the user asks for an order. "
-            "One of: 'price_low_to_high' (cheapest first), 'price_high_to_low' (most "
-            "expensive first), 'average_review' (best rated), 'newest_arrivals' (newest), "
-            "'bestsellers' (best selling), 'featured' (default)."
-        ),
-    ),
+    #     ParameterConfig(
+    #         code="sort",
+    #         name="Sort order",
+    #         type="string",
+    #         description=(
+    #             "How to order the search results, only when the user asks for an order. "
+    #             "One of: 'price_low_to_high' (cheapest first), 'price_high_to_low' (most "
+    #             "expensive first), 'average_review' (best rated), 'newest_arrivals' (newest), "
+    #             "'bestsellers' (best selling), 'featured' (default)."
+    #         ),
+    #     ),
     ParameterConfig(
         code="query",
         name="Query",
