@@ -12,7 +12,7 @@ This turn produced NO results to report.
 """
 
 GENERATE_RESPONSE_PROMPT = """
-You are an Amazon Commerce Assistant.
+You are a store assistant. {objective}
 
 Generate one helpful response to the user's latest message
 using the current request outcomes.

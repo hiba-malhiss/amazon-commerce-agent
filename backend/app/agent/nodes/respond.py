@@ -67,10 +67,8 @@ async def respond_node(state: AgentState) -> AgentStateUpdate:
         )
     ]
 
-    if collected:
-        system_message = SystemMessage(content=GENERATE_RESPONSE_PROMPT)
-    else:
-        system_message = SystemMessage(content=NO_RESULTS_PROMPT.format(objective=AGENT_OBJECTIVE))
+    prompt = GENERATE_RESPONSE_PROMPT if collected else NO_RESULTS_PROMPT
+    system_message = SystemMessage(content=prompt.format(objective=AGENT_OBJECTIVE))
 
     # Provide current execution results
     outcomes_message = HumanMessage(
