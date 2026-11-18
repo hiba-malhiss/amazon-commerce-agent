@@ -14,7 +14,7 @@ export function TypingIndicator() {
           <i />
           <i />
         </span>
-        <span className="typing__text">Searching…</span>
+        <span className="typing__text">Thinking…</span>
       </div>
     </div>
   );
