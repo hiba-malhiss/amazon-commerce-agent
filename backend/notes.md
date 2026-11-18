@@ -139,3 +139,60 @@ cd backend
 # Start FastAPI
 .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+---
+
+# Entity references & card display — issues faced and fixes
+
+### Approach (how it works)
+
+A turn flows `understand → request_resolver → tool_workflow → collect → respond`.
+Two ideas keep "which result did the user mean?" honest:
+
+- **Deterministic cards.** Application code (`numbered_cards`) selects and orders the cards
+  the user sees, capped by config (`max_cards_per_reply`). The response LLM only *describes*
+  them — it never chooses or reorders what is displayed.
+- **Grounded references.** The Understanding LLM maps the user's words to visible results,
+  then **code** (`check_references`) validates that the reference is real and the quote is
+  the user's own words — the model can't invent a reference. The product id always comes
+  from stored data, never the LLM.
+
+### Issues we hit and how we fixed them
+
+1. **Cards and the reply disagreed on order.** A search returned an off-topic result
+   (a monitor for a TV query) as card #1; the reply dropped it from its prose but the card
+   stayed, so "the first option" was ambiguous (card #1 ≠ first named in text).
+   *Fix:* cards are selected/ordered deterministically by `numbered_cards` and the reply is
+   told to describe results in card order; `collect`/`service` show exactly those cards.
+   (We deliberately did **not** add relevance filtering yet — evaluate first.)
+
+2. **"The first option" resolved to an older results list.** With several lists on screen,
+   a bare position was read against the wrong one.
+   *Fix:* `visible_briefs` feeds Understanding newest-list-first, numbered from 1, and the
+   prompt states a bare position counts within the most recent list.
+
+3. **"Compare it to the third option" showed only one card.** The model resolved "it"
+   correctly but quoted the product's *name* (or an invented "the first option") instead of
+   "it", so `check_references` rejected it with "Which item do you mean?" → that request
+   returned no entity → one card.
+   *Fix:* `check_references` now accepts a quote that **names the referenced visible result**
+   (`quote_names_references`), and the name-ambiguity check (rule 3) only runs for quotes
+   taken from the user's own message. Both requests resolve → both cards show. The displayed
+   cards are the successful outcomes' entities, combined by `numbered_cards`.
+
+4. **Language-specific stopwords.** `quote_names_references` first filtered English filler
+   words, which breaks for other languages.
+   *Fix:* it now compares the quote's words to the result's label words and accepts when at
+   least half overlap — no hard-coded word list, so it works in any language.
+
+5. **Prompts were commerce/Amazon-specific.** To reuse the agent for other companies, the
+   domain now lives only in config (`AGENT_OBJECTIVE`); the Understanding and response
+   prompts use generic wording ("results"/"items", not "products"/"TVs"/brand names).
+
+### Still open (evaluate before fixing)
+
+- **Search relevance.** Off-topic results (a monitor for "TV") still appear as cards; we only
+  fixed the card/text consistency, not retrieval quality.
+- **RAG answerability.** A topically-near chunk can be retrieved for a question the document
+  doesn't actually answer (e.g. "cancel after it ships"); a cosine threshold can't separate
+  answerable from not-answerable (measured). Needs a relevance grader or citation check.
