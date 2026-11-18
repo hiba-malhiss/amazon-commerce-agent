@@ -1,3 +1,7 @@
+.events {
+  min-width: 0; /* let children wrap rather than scroll the panel horizontally */
+}
+
 .events__actions {
   display: flex;
   align-items: center;

@@ -50,9 +50,19 @@
 
 .reasoning__stage-header {
   display: flex;
+  flex-wrap: wrap; /* a long title + tags wrap instead of widening the panel */
   align-items: center;
   gap: 6px;
   margin-bottom: 4px;
+  min-width: 0;
+}
+
+/* Timeline stages and cards must be allowed to shrink below their content width,
+   otherwise a long value inside forces the whole panel to scroll sideways. */
+.reasoning__stage,
+.reasoning__card {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .reasoning__stage-title {
@@ -69,6 +79,16 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   word-break: break-all;
+}
+
+/* Collapse headers (RAG chunk filename › section) wrap instead of overflowing */
+.reasoning__timeline .ant-collapse-header {
+  align-items: flex-start;
+}
+
+.reasoning__timeline .ant-collapse-header-text {
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .reasoning__card {
@@ -90,24 +110,37 @@
   margin-bottom: 8px;
 }
 
+/* Fixed layout = the table honors the column widths below and wraps long values,
+   instead of growing to fit the longest URL/JSON and scrolling the panel sideways. */
+.reasoning__details .ant-descriptions-view table {
+  table-layout: fixed;
+  width: 100%;
+}
+
 .reasoning__details .ant-descriptions-item-label {
-  width: 130px;
+  width: 120px;
   font-size: 12px;
 }
 
 .reasoning__details .ant-descriptions-item-content {
   font-size: 12px;
-  word-break: break-word;
+  overflow-wrap: anywhere; /* break long unbroken tokens (URLs, ids) too */
 }
 
 .reasoning__params {
+  table-layout: fixed;
+  width: 100%;
   border-collapse: collapse;
 }
 
 .reasoning__params td {
   padding: 1px 10px 1px 0;
   vertical-align: top;
-  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.reasoning__params td:first-child {
+  width: 38%; /* parameter name column; value column takes the rest and wraps */
 }
 
 .reasoning__results {

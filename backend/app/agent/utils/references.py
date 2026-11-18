@@ -1,4 +1,11 @@
-"""Checks on the visible results Understanding says the user pointed at."""
+"""
+Validate the product references identified by the AI against the results visible to the user.
+
+- Ensure every referenced product is visible.
+- Verify that the reference is grounded in the user's message or the referenced product's name.
+- Detect ambiguity when a description matches multiple products.
+- Ask the user for clarification when a reference is invalid or ambiguous.
+"""
 
 import re
 import unicodedata
@@ -9,11 +16,6 @@ from app.agent.schemas.resolution import UnderstoodRequestData
 def check_references(
     request: UnderstoodRequestData, label_by_reference: dict[str, str], message: str
 ) -> str | None:
-    """A question to ask when the results the user pointed at can't be trusted, else None.
-    1. Every reference is a visible product. If not → ask.
-    2. The quote's words are in the user's message. If not → ask.
-    3. The names in the quote fit 2+ products (and the user said nothing else to tell them apart)
-    """
     references = request["referenced_entities"]
     if not references:
         return None
@@ -23,13 +25,35 @@ def check_references(
         return "Which item do you mean?" if label_by_reference else "There are no results yet."
 
     quote = request["reference_quote"] or ""
-    if not quote_in_message(quote, message):
+
+    in_message = quote_in_message(quote, message)
+    if not in_message and not quote_names_references(quote, references, label_by_reference):
         return "Which item do you mean?"
 
-    named, says_more = named_cards(quote, label_by_reference)
-    if len(references) == 1 and references[0] in named and len(named) > 1 and not says_more:
-        return f"Which one do you mean: {' or '.join(label_by_reference[r] for r in named)}?"
+    if in_message:
+        named, says_more = named_cards(quote, label_by_reference)
+        if len(references) == 1 and references[0] in named and len(named) > 1 and not says_more:
+            return f"Which one do you mean: {' or '.join(label_by_reference[r] for r in named)}?"
     return None
+
+
+def quote_names_references(
+    quote: str, references: list[str], label_by_reference: dict[str, str]
+) -> bool:
+    """True when the quote is largely the referenced results' label: at least half of its
+    words appear in their labels. Lets the model quote the result it resolved a pronoun to
+    ("INSIGNIA 43"), but not an invented position ("the first option").
+
+    Language-agnostic on purpose: it compares the quote's words to the label's words, so it
+    works whatever language the user (and the labels) are in — no hard-coded filler words,
+    which would only ever cover one language. A few connectives ("the") stay in the quote,
+    but the half-or-more rule tolerates them."""
+    quote_words = words(quote)
+    if not quote_words:
+        return False
+    label_words = set().union(*(words(label_by_reference[reference]) for reference in references))
+    in_label = quote_words & label_words
+    return len(in_label) * 2 >= len(quote_words)
 
 
 def named_cards(quote: str, label_by_reference: dict[str, str]) -> tuple[list[str], bool]:
