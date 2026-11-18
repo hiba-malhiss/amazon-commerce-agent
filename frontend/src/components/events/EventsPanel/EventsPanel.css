@@ -35,8 +35,19 @@
 }
 
 /* The JSON viewer (react-json-view-lite): monospace and small, like the rest of the panel */
+.events__item {
+  overflow: hidden; /* long JSON values wrap instead of widening the panel */
+}
+
 .events__item ul, .events__item li {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   line-height: 1.6;
+}
+
+/* Wrap long values/URLs/section paths instead of overflowing horizontally */
+.events__item,
+.events__item * {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }

@@ -20,7 +20,12 @@ export function ChatHeader({ title, status, eventsOpen, onToggleEvents }: Props)
         </Typography.Title>
         <span className="chat-header__right">
           <ConnectionStatus status={status} />
-          <Button size="small" icon={<CodeOutlined />} type={eventsOpen ? "primary" : "default"} onClick={onToggleEvents}>
+          <Button
+            size="small"
+            icon={<CodeOutlined />}
+            type={eventsOpen ? "primary" : "default"}
+            onClick={onToggleEvents}
+          >
             Events
           </Button>
         </span>

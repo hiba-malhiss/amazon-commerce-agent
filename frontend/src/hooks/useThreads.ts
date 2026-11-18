@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createThread, listThreads } from "../api/threads";
 import type { ThreadSummary } from "../api/types";
-import { useUrlThreadId } from "./useUrlThreadId";
 
 export const DEFAULT_TITLE = "New chat";
 
@@ -13,7 +12,6 @@ export function useThreads() {
   const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [activeId, setActiveId] = useUrlThreadId();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const loadingRef = useRef(false);
@@ -66,20 +64,18 @@ export function useThreads() {
     setCreating(true);
     try {
       const { thread_id } = await createThread();
-      setActiveId(thread_id);
       await refresh();
+      return thread_id;
     } finally {
       setCreating(false);
     }
-  }, [refresh, setActiveId]);
+  }, [refresh]);
 
   return {
     threads,
     hasMore,
     loadingMore,
     loadMore,
-    activeId,
-    setActiveId,
     creating,
     createNewThread,
     refresh,

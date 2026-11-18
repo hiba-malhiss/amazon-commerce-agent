@@ -8,6 +8,7 @@ export interface ChatMessage {
   role: "user" | "assistant" | "note";
   text: string;
   entities: Card[];
+  interactionId?: string; // the interaction this message belongs to (for "view events")
   pending?: boolean;
   failed?: boolean;
 }
@@ -18,6 +19,7 @@ function fromResponse(m: MessageResponse): ChatMessage {
     role: m.context.role,
     text: m.body.text,
     entities: m.body.entities,
+    interactionId: m.context.interaction_id,
   };
 }
 
@@ -97,6 +99,7 @@ export function useChat({ threadId, onThreadCreated, onReplied }: Options) {
               role: "note",
               text: "The agent handled your message but didn't send a reply.",
               entities: [],
+              interactionId: data.interaction_id,
             },
       );
       return next;

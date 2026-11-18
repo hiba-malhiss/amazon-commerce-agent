@@ -26,4 +26,5 @@ body {
 
 .app__content .ant-splitter-panel {
   display: flex;
+  min-width: 0; /* let panels shrink; wide content wraps/scrolls instead of widening them */
 }

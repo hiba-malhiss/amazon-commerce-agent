@@ -9,6 +9,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/threads": BACKEND,
+      "/interactions": BACKEND,
       "/knowledge-bases": { target: BACKEND, ws: true }, // + the live document updates
       "/health": BACKEND,
       "/ws": { target: BACKEND, ws: true },

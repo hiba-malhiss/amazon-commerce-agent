@@ -11,10 +11,12 @@
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
     "antd": "^6.6.8",
+    "jotai": "^2.20.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-json-view-lite": "^2.5.0",
     "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.5",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
