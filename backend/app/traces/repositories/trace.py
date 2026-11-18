@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.traces.models.trace import Trace
@@ -15,3 +16,8 @@ class TraceRepository:
         self.session.add(trace)
         await self.session.flush()
         return trace
+
+    async def get_by_interaction(self, interaction_id: UUID) -> Trace | None:
+        return await self.session.scalar(
+            select(Trace).where(Trace.interaction_id == interaction_id)
+        )

@@ -99,6 +99,7 @@ class ConversationService:
         # Execute LangGraph. Nodes emit their own trace events with get_stream_writer()
         final_state = None
         trace_events: list[dict[str, Any]] = []
+        prompt_events: list[dict[str, Any]] = []
         async for event in graph.astream(
             {
                 "messages": [
@@ -119,9 +120,9 @@ class ConversationService:
 
             elif event["type"] == "custom":
                 data = {"interaction_id": str(interaction.id), **event["data"]}
-                # Prompt events: {"kind": "prompt", "node", "prompt": <the system prompt>}.
-                # Streamed live for the UI, but not stored in the trace (they're large).
+                # Prompt events: {"kind": "prompt", "node", "prompt": <the system prompt>}
                 if data.pop("kind", None) == "prompt":
+                    prompt_events.append(data)
                     if on_prompt:
                         await on_prompt(data)
                 # Trace events: {"node", "status": started | completed | failed, "data": {...}}
@@ -161,7 +162,7 @@ class ConversationService:
         await self.traces.create(
             interaction_id=interaction.id,
             thread_id=thread.id,
-            data={"events": trace_events},
+            data={"events": trace_events, "prompts": prompt_events},
         )
 
         await self.session.commit()
@@ -212,6 +213,13 @@ class ConversationService:
             raise ValueError(f"Thread '{thread_id}' not found")
 
         return await self.messages.get_by_thread(thread_id)
+
+    async def get_interaction_trace(self, interaction_id: UUID) -> dict[str, Any]:
+        """The saved trace of one interaction (events + prompts), for the 'view events' button."""
+        trace = await self.traces.get_by_interaction(interaction_id)
+        if trace is None:
+            raise ValueError(f"Trace for interaction '{interaction_id}' not found")
+        return trace.data
 
 
 def thread_title(message: str) -> str:

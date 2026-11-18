@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.conversations.schemas.interaction import InteractionEventsResponse
 from app.conversations.schemas.message import (
     MessageBody,
     MessageContext,
@@ -43,6 +44,25 @@ async def list_threads(
     return ThreadListResponse(
         threads=[ThreadSummary(thread_id=thread.id, title=thread.title) for thread in threads],
         has_more=has_more,
+    )
+
+
+@router.get(
+    "/interactions/{interaction_id}/events",
+    response_model=InteractionEventsResponse,
+)
+async def get_interaction_events(
+    interaction_id: UUID,
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> InteractionEventsResponse:
+    service = ConversationService(session)
+    try:
+        trace = await service.get_interaction_trace(interaction_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    return InteractionEventsResponse(
+        events=trace.get("events", []), prompts=trace.get("prompts", [])
     )
 
 
