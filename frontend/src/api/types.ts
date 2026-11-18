@@ -38,7 +38,7 @@ export interface KnowledgeDocument {
   knowledge_base_code: string;
   filename: string;
   status: DocumentStatus;
-  error: string | null; // why indexing failed
+  error: string | null; // why indexing failed (or is being retried)
   chunk_count: number;
   created_at: string;
   updated_at: string;
@@ -56,6 +56,16 @@ export interface KnowledgeChunk {
 
 export interface KnowledgeChunkListResponse {
   chunks: KnowledgeChunk[];
+}
+
+// What the worker is doing to an "indexing" document (null: it's queued)
+export type IndexingStep = "chunking" | "embedding" | "retrying";
+
+// A document change pushed over the knowledge base WebSocket
+export interface DocumentEvent {
+  type: "updated" | "deleted";
+  document: KnowledgeDocument;
+  step: IndexingStep | null;
 }
 
 export interface KnowledgeDocumentListResponse {

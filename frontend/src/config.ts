@@ -8,6 +8,3 @@ export const THREADS_PAGE_SIZE = 20;
 // settings.py → max_upload_mb
 export const KNOWLEDGE_FILE_TYPES = [".pdf", ".txt", ".md"];
 export const MAX_UPLOAD_MB = 20;
-
-// How often the document list refreshes while a file is being indexed
-export const KNOWLEDGE_POLL_MS = 2000;

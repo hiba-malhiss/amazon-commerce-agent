@@ -2,7 +2,7 @@ import { DeleteOutlined, EyeOutlined, FileTextOutlined, LoadingOutlined, UploadO
 import { App as AntApp, Alert, Button, Popconfirm, Select, Table, Tag, Tooltip, Typography, Upload } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useState } from "react";
-import type { DocumentStatus, KnowledgeDocument } from "../../../api/types";
+import type { DocumentStatus, IndexingStep, KnowledgeDocument } from "../../../api/types";
 import { KNOWLEDGE_FILE_TYPES, MAX_UPLOAD_MB } from "../../../config";
 import { useKnowledgeDocuments } from "../../../hooks/useKnowledgeDocuments";
 import { ChunksDrawer } from "../ChunksDrawer/ChunksDrawer";
@@ -14,10 +14,18 @@ const STATUS_TAG: Record<DocumentStatus, { color: string; label: string }> = {
   failed: { color: "error", label: "Failed" },
 };
 
+// An indexing document's tag shows what the worker is doing, live
+const STEP_LABEL: Record<IndexingStep, string> = {
+  chunking: "Chunking",
+  embedding: "Embedding",
+  retrying: "Retrying",
+};
+
 // Upload, list, review the chunks of, and delete the documents the agent answers policy questions from
 export function KnowledgePanel() {
   const { message } = AntApp.useApp();
-  const { knowledgeBases, kbCode, setKbCode, documents, loading, error, upload, remove } = useKnowledgeDocuments();
+  const { knowledgeBases, kbCode, setKbCode, documents, steps, loading, error, upload, remove } =
+    useKnowledgeDocuments();
   const [reviewedDocument, setReviewedDocument] = useState<KnowledgeDocument | null>(null);
 
   const handleUpload = async (file: File) => {
@@ -36,7 +44,7 @@ export function KnowledgePanel() {
 
   const handleDelete = async (document: KnowledgeDocument) => {
     try {
-      await remove(document.id);
+      await remove(document);
       message.success(`${document.filename} deleted`);
     } catch (e) {
       message.error(`Couldn't delete ${document.filename}: ${(e as Error).message}`);
@@ -58,9 +66,13 @@ export function KnowledgePanel() {
       dataIndex: "status",
       width: 130,
       render: (status: DocumentStatus, document) => {
+        const step = status === "indexing" ? steps[document.id] : undefined;
         const tag = (
-          <Tag color={STATUS_TAG[status].color} icon={status === "indexing" ? <LoadingOutlined /> : undefined}>
-            {STATUS_TAG[status].label}
+          <Tag
+            color={step === "retrying" ? "warning" : STATUS_TAG[status].color}
+            icon={status === "indexing" ? <LoadingOutlined /> : undefined}
+          >
+            {step ? STEP_LABEL[step] : STATUS_TAG[status].label}
           </Tag>
         );
         return document.error ? <Tooltip title={document.error}>{tag}</Tooltip> : tag;

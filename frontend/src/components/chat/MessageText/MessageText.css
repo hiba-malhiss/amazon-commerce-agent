@@ -14,13 +14,20 @@
   margin: 0 0 8px;
 }
 
-.bubble__md ul, .bubble__md ol {
+.bubble__md ul,
+.bubble__md ol {
   margin: 4px 0 8px;
   padding-inline-start: 22px;
 }
 
 .bubble__md li {
   margin: 2px 0;
+}
+
+/* Keep "loose" lists (blank lines between items) tight: the markdown wraps each
+   item's text in a <p>, which would otherwise add paragraph spacing per item. */
+.bubble__md li p {
+  margin: 0;
 }
 
 .bubble__md a {
@@ -39,7 +46,8 @@
   font-size: 14px;
 }
 
-.bubble__md th, .bubble__md td {
+.bubble__md th,
+.bubble__md td {
   border: 1px solid #e0e0e0;
   padding: 4px 8px;
   text-align: left;

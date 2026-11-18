@@ -15,9 +15,11 @@ function humanize(code: string): string {
 // The card's attributes worth a line: numbers and short text, not its name again
 function details(card: Card): [string, string][] {
   return Object.entries(card.attributes)
-    .filter(([, value]) =>
-      typeof value === "number" ||
-      (typeof value === "string" && value !== card.label && value.length <= MAX_VALUE_LENGTH),
+    .filter(([code]) => code !== "image" && code !== "link") // shown as image + link, not text
+    .filter(
+      ([, value]) =>
+        typeof value === "number" ||
+        (typeof value === "string" && value !== card.label && value.length <= MAX_VALUE_LENGTH),
     )
     .slice(0, MAX_DETAILS)
     .map(([code, value]) => [humanize(code), String(value)]);
@@ -29,6 +31,9 @@ export function ItemCards({ cards }: { cards: Card[] }) {
     <div className="item-cards">
       {cards.map((card) => (
         <AntCard key={card.reference} size="small" className="item-card">
+          {typeof card.attributes.image === "string" && (
+            <img className="item-card__image" src={card.attributes.image} alt="" loading="lazy" />
+          )}
           <Typography.Paragraph className="item-card__label" ellipsis={{ rows: 2, tooltip: card.label }}>
             {card.label}
           </Typography.Paragraph>
@@ -38,6 +43,11 @@ export function ItemCards({ cards }: { cards: Card[] }) {
               <span>{value}</span>
             </div>
           ))}
+          {typeof card.attributes.link === "string" && (
+            <a className="item-card__link" href={card.attributes.link} target="_blank" rel="noopener noreferrer">
+              View on Amazon ↗
+            </a>
+          )}
         </AntCard>
       ))}
     </div>

@@ -1,3 +1,4 @@
+import { reconnectDelay, socketUrl } from "./socket";
 import type { ChatEvent, ChatRequest } from "./types";
 
 export type SocketStatus = "connecting" | "open" | "closed";
@@ -17,9 +18,8 @@ export class ChatSocket {
 
   connect(): void {
     this.stopped = false;
-    const scheme = window.location.protocol === "https:" ? "wss" : "ws";
     this.handlers.onStatus("connecting");
-    const ws = new WebSocket(`${scheme}://${window.location.host}/ws/chat`);
+    const ws = new WebSocket(socketUrl("/ws/chat"));
     this.ws = ws;
 
     ws.onopen = () => {
@@ -36,9 +36,8 @@ export class ChatSocket {
     ws.onclose = () => {
       this.handlers.onStatus("closed");
       if (this.stopped) return;
-      const delay = Math.min(1000 * 2 ** this.retry, 10_000);
+      this.timer = window.setTimeout(() => this.connect(), reconnectDelay(this.retry));
       this.retry += 1;
-      this.timer = window.setTimeout(() => this.connect(), delay);
     };
   }
 

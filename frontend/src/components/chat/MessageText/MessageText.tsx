@@ -13,7 +13,7 @@ export function MessageText({ text, markdown }: Props) {
     return <Typography.Paragraph className="bubble__text">{text}</Typography.Paragraph>;
   }
   return (
-    <div className="bubble__text bubble__md">
+    <div className="bubble__md">
       <Markdown
         remarkPlugins={[remarkGfm]}
         components={{
